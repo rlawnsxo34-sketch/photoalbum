@@ -21,7 +21,7 @@
             background-color: #f5f5f4; 
             margin: 0;
             padding: 0;
-            -webkit-tap-highlight-color: transparent; /* 모바일 터치 깜빡임 제거 */
+            -webkit-tap-highlight-color: transparent;
         }
 
         .font-serif-kr { font-family: 'Noto Serif KR', serif; }
@@ -33,13 +33,13 @@
             to { opacity: 1; transform: translateY(0); }
         }
         .animate-fade-up {
-            animation: fadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            animation: fadeUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
         
         .hidden-step { display: none !important; }
     </style>
 </head>
-<body class="bg-[#e7e5e4] min-h-screen flex items-center justify-center p-0 sm:p-4 md:p-8">
+<body class="bg-[#e7e5e4] min-h-screen flex items-center justify-center p-0 sm:p-4 md:p-8 relative">
 
     <!-- 메인 컨테이너 -->
     <div class="w-full max-w-6xl bg-white sm:rounded-[2rem] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.1)] overflow-hidden flex flex-col min-h-screen sm:min-h-[700px] border-0 sm:border border-stone-200 relative">
@@ -87,8 +87,8 @@
                     선택하신 풍경 테마에 맞춰 고화질 갤러리 액자를 제작합니다.
                 </p>
                 
-                <!-- 터치 오류를 막기 위해 박스 전체에 onclick 이벤트를 부여하여 파일 입력창을 직접 띄웁니다 -->
-                <div id="upload-box" onclick="document.getElementById('photo-input').click()" class="cursor-pointer w-full max-w-[500px] aspect-square rounded-2xl border-[1.5px] border-dashed flex items-center justify-center relative overflow-hidden transition-all duration-300 hover:shadow-xl group bg-white mx-auto shadow-sm">
+                <!-- 터치 시 직접 파일창이 열리지 않고 권한 묻기 팝업 호출 -->
+                <div id="upload-box" onclick="openModal('upload')" class="cursor-pointer w-full max-w-[500px] aspect-square rounded-2xl border-[1.5px] border-dashed flex items-center justify-center relative overflow-hidden transition-all duration-300 hover:shadow-xl group bg-white mx-auto shadow-sm">
                     <div id="upload-bg-tint" class="absolute inset-0 opacity-[0.03]"></div>
                     
                     <!-- 파일 인풋은 화면에서 숨깁니다 -->
@@ -120,7 +120,6 @@
                 <div id="result-img-container" class="w-full flex-shrink-0 relative flex flex-col items-center">
                     <div class="absolute inset-0 bg-black/10 blur-xl translate-y-4 sm:translate-y-6 rounded-3xl"></div>
                     <img id="final-image" src="" alt="사계절 풍경 액자" class="w-full h-auto max-h-[50vh] sm:max-h-[65vh] object-contain block relative z-10 shadow-[0_15px_30px_rgba(0,0,0,0.15)] border border-stone-200/50 rounded-sm" />
-                    <!-- 모바일 길게 누르기 안내 문구 삭제됨 -->
                 </div>
 
                 <div class="flex flex-col gap-6 text-left max-w-md w-full px-4 sm:px-0 mt-6 sm:mt-0">
@@ -130,7 +129,8 @@
                     </div>
 
                     <div class="flex flex-col gap-3 mt-2">
-                        <button id="download-btn" onclick="handleDownload()" class="w-full flex items-center justify-center gap-3 py-4 sm:py-5 px-6 rounded-xl sm:rounded-2xl font-serif-kr text-lg sm:text-xl text-white transition-all duration-300 active:scale-95 hover:shadow-lg hover:-translate-y-1 shadow-md">
+                        <!-- 터치 시 바로 다운로드하지 않고 다운로드 팝업 호출 -->
+                        <button id="download-btn" onclick="openModal('download')" class="w-full flex items-center justify-center gap-3 py-4 sm:py-5 px-6 rounded-xl sm:rounded-2xl font-serif-kr text-lg sm:text-xl text-white transition-all duration-300 active:scale-95 hover:shadow-lg hover:-translate-y-1 shadow-md">
                             <i data-lucide="download" class="w-5 h-5"></i> 고화질 이미지 저장
                         </button>
                         <button onclick="handleReset()" class="w-full flex items-center justify-center gap-2 py-4 px-6 rounded-xl sm:rounded-2xl font-gowun text-base sm:text-lg bg-stone-200/50 text-stone-700 hover:bg-stone-200 transition-colors active:scale-95 border border-transparent">
@@ -140,6 +140,23 @@
                 </div>
             </div>
 
+        </div>
+    </div>
+
+    <!-- 커스텀 팝업 (모달) UI -->
+    <div id="custom-modal" class="hidden fixed inset-0 bg-black/50 z-[100] flex items-center justify-center p-5 backdrop-blur-sm transition-opacity">
+        <div class="bg-white rounded-[1.5rem] w-full max-w-sm overflow-hidden shadow-2xl transform transition-all animate-fade-up">
+            <div class="p-8 text-center">
+                <div id="modal-icon-container" class="w-14 h-14 rounded-full bg-stone-100 mx-auto flex items-center justify-center mb-5">
+                    <!-- 아이콘 동적 삽입 -->
+                </div>
+                <h3 id="modal-title" class="text-2xl font-serif-kr text-stone-800 mb-3 font-bold">권한 요청</h3>
+                <p id="modal-desc" class="text-stone-500 font-gowun text-[15px] leading-relaxed keep-all">안내 텍스트</p>
+            </div>
+            <div class="flex border-t border-stone-100 bg-stone-50/50">
+                <button onclick="closeModal()" class="flex-1 py-4 text-stone-500 font-gowun text-lg hover:bg-stone-100 transition-colors active:bg-stone-200">취소</button>
+                <button id="modal-confirm-btn" class="flex-1 py-4 text-green-600 font-bold font-gowun text-lg border-l border-stone-100 hover:bg-white transition-colors active:bg-stone-50">확인</button>
+            </div>
         </div>
     </div>
 
@@ -155,8 +172,9 @@
 
         let currentSeason = null;
         let generatedImageUrl = null;
+        let modalPendingAction = null; // 모달에서 확인 버튼 클릭 시 실행할 함수 저장
 
-        // 아이콘 렌더링 시작
+        // 아이콘 초기화
         lucide.createIcons();
 
         // 초기 화면 세팅 (버튼 동적 생성)
@@ -177,7 +195,53 @@
         });
         lucide.createIcons(); 
 
-        // 이미지 로드 유틸
+        // ====== 커스텀 팝업 (모달) 로직 ======
+        function openModal(type) {
+            const modal = document.getElementById('custom-modal');
+            const title = document.getElementById('modal-title');
+            const desc = document.getElementById('modal-desc');
+            const iconContainer = document.getElementById('modal-icon-container');
+            const confirmBtn = document.getElementById('modal-confirm-btn');
+
+            if (type === 'upload') {
+                title.innerText = '사진첩 접근 권한';
+                desc.innerText = '아름다운 액자를 만들기 위해 기기의 갤러리(사진첩)에 접근하시겠습니까?';
+                iconContainer.innerHTML = '<i data-lucide="image-plus" class="w-7 h-7 text-green-600"></i>';
+                
+                confirmBtn.innerText = '허용하기';
+                confirmBtn.className = 'flex-1 py-4 text-green-600 font-bold font-gowun text-lg border-l border-stone-100 hover:bg-white transition-colors active:bg-stone-50';
+                
+                modalPendingAction = () => {
+                    document.getElementById('photo-input').click();
+                };
+            } else if (type === 'download') {
+                title.innerText = '이미지 다운로드';
+                desc.innerText = '완성된 고화질 액자 이미지를 내 기기에 저장하시겠습니까?';
+                iconContainer.innerHTML = '<i data-lucide="download-cloud" class="w-7 h-7 text-blue-600"></i>';
+                
+                confirmBtn.innerText = '다운로드';
+                confirmBtn.className = 'flex-1 py-4 text-blue-600 font-bold font-gowun text-lg border-l border-stone-100 hover:bg-white transition-colors active:bg-stone-50';
+                
+                modalPendingAction = () => {
+                    executeDownload();
+                };
+            }
+
+            lucide.createIcons(); // 아이콘 리렌더링
+            modal.classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('custom-modal').classList.add('hidden');
+            modalPendingAction = null;
+        }
+
+        document.getElementById('modal-confirm-btn').addEventListener('click', () => {
+            if (modalPendingAction) modalPendingAction();
+            closeModal();
+        });
+        // ===================================
+
         const loadImg = (src, isExternal = false) => {
             return new Promise((resolve, reject) => {
                 const img = new Image();
@@ -233,7 +297,7 @@
             setStep(1);
         }
 
-        // 사진 업로드 이벤트 연결
+        // 사진 파일이 선택되면 캔버스 합성을 시작합니다
         document.getElementById('photo-input').addEventListener('change', (e) => {
             const file = e.target.files[0];
             if (file) {
@@ -250,7 +314,7 @@
             document.getElementById('upload-default-ui').style.display = 'none';
             document.getElementById('loading-ui').style.display = 'flex';
             
-            // 박스 터치 방지 (로딩중 중복클릭 방지)
+            // 로딩 중 박스 클릭 방지
             document.getElementById('upload-box').onclick = null;
 
             try {
@@ -363,13 +427,14 @@
                 document.getElementById('photo-input').disabled = false;
                 document.getElementById('upload-default-ui').style.display = 'flex';
                 document.getElementById('loading-ui').style.display = 'none';
-                // 다시 이벤트 복구
-                document.getElementById('upload-box').onclick = () => document.getElementById('photo-input').click();
+                
+                // 작업 완료 후 다시 팝업을 띄우는 이벤트 연결
+                document.getElementById('upload-box').onclick = () => openModal('upload');
             }
         }
 
-        // 안정적인 직접 다운로드 실행 (모바일 오류 최소화)
-        function handleDownload() {
+        // 실제 다운로드를 처리하는 함수
+        function executeDownload() {
             if (!generatedImageUrl) return;
             const link = document.createElement('a');
             link.href = generatedImageUrl;
