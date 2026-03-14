@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>장성숲체원 기억 보관소</title>
     
     <!-- Tailwind CSS (CDN으로 바로 불러오기) -->
@@ -21,6 +21,7 @@
             background-color: #f5f5f4; 
             margin: 0;
             padding: 0;
+            -webkit-tap-highlight-color: transparent; /* 모바일 터치 깜빡임 제거 */
         }
 
         .font-serif-kr { font-family: 'Noto Serif KR', serif; }
@@ -86,16 +87,19 @@
                     선택하신 풍경 테마에 맞춰 고화질 갤러리 액자를 제작합니다.
                 </p>
                 
-                <div id="upload-box" class="w-full max-w-[500px] aspect-square rounded-2xl border-[1.5px] border-dashed flex items-center justify-center relative overflow-hidden transition-all duration-300 hover:shadow-xl group bg-white mx-auto shadow-sm">
+                <!-- 터치 오류를 막기 위해 박스 전체에 onclick 이벤트를 부여하여 파일 입력창을 직접 띄웁니다 -->
+                <div id="upload-box" onclick="document.getElementById('photo-input').click()" class="cursor-pointer w-full max-w-[500px] aspect-square rounded-2xl border-[1.5px] border-dashed flex items-center justify-center relative overflow-hidden transition-all duration-300 hover:shadow-xl group bg-white mx-auto shadow-sm">
                     <div id="upload-bg-tint" class="absolute inset-0 opacity-[0.03]"></div>
-                    <input type="file" id="photo-input" accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" />
                     
-                    <div id="upload-default-ui" class="flex flex-col items-center gap-3 sm:gap-5 p-4 sm:p-8 transition-transform duration-500 group-hover:scale-105 relative z-10">
+                    <!-- 파일 인풋은 화면에서 숨깁니다 -->
+                    <input type="file" id="photo-input" accept="image/*" class="hidden" />
+                    
+                    <div id="upload-default-ui" class="flex flex-col items-center gap-3 sm:gap-5 p-4 sm:p-8 transition-transform duration-500 group-hover:scale-105 relative z-10 pointer-events-none">
                         <div id="upload-icon-bg" class="w-16 h-16 sm:w-20 sm:h-20 rounded-full flex items-center justify-center shadow-sm">
                             <i data-lucide="upload-cloud" id="upload-icon" class="w-6 h-6 sm:w-8 sm:h-8" stroke-width="1.5"></i>
                         </div>
                         <div class="text-stone-700 font-serif-kr text-xl sm:text-2xl">여기를 터치하여 사진 선택</div>
-                        <div class="text-stone-400 font-gowun text-xs sm:text-sm tracking-wide bg-stone-100 px-3 py-1 rounded-full">스마트폰 앨범에서 선택 가능</div>
+                        <div class="text-stone-400 font-gowun text-xs sm:text-sm tracking-wide bg-stone-100 px-3 py-1 rounded-full">스마트폰 앨범에서 바로 선택</div>
                     </div>
 
                     <!-- 로딩 UI -->
@@ -116,14 +120,10 @@
                 <div id="result-img-container" class="w-full flex-shrink-0 relative flex flex-col items-center">
                     <div class="absolute inset-0 bg-black/10 blur-xl translate-y-4 sm:translate-y-6 rounded-3xl"></div>
                     <img id="final-image" src="" alt="사계절 풍경 액자" class="w-full h-auto max-h-[50vh] sm:max-h-[65vh] object-contain block relative z-10 shadow-[0_15px_30px_rgba(0,0,0,0.15)] border border-stone-200/50 rounded-sm" />
-                    
-                    <div class="flex items-center gap-2 mt-5 text-xs text-stone-500 font-gowun bg-white/90 px-5 py-2.5 rounded-full border border-stone-200 shadow-sm relative z-10">
-                        <i data-lucide="info" class="w-4 h-4 text-amber-500"></i>
-                        <span>모바일에서는 이미지를 <strong>길게 눌러서 저장</strong>할 수 있습니다.</span>
-                    </div>
+                    <!-- 모바일 길게 누르기 안내 문구 삭제됨 -->
                 </div>
 
-                <div class="flex flex-col gap-6 text-left max-w-md w-full px-4 sm:px-0">
+                <div class="flex flex-col gap-6 text-left max-w-md w-full px-4 sm:px-0 mt-6 sm:mt-0">
                     <div class="text-center lg:text-left">
                         <h2 class="text-2xl sm:text-4xl lg:text-5xl font-serif-kr mb-3 sm:mb-5 text-stone-800 leading-tight keep-all">아름다운 풍경 속에<br/>추억이 담겼습니다.</h2>
                         <p id="result-desc" class="hidden sm:block text-stone-500 text-sm sm:text-lg leading-relaxed font-gowun keep-all"></p>
@@ -175,7 +175,7 @@
             `;
             buttonsContainer.innerHTML += btnHtml;
         });
-        lucide.createIcons(); // 동적 생성 후 아이콘 리렌더링
+        lucide.createIcons(); 
 
         // 이미지 로드 유틸
         const loadImg = (src, isExternal = false) => {
@@ -216,7 +216,6 @@
         function handleSeasonSelect(seasonId) {
             currentSeason = SEASON_DATA[seasonId];
             
-            // Step 2 디자인 설정
             document.getElementById('step2-title').innerText = `${currentSeason.name.split(',')[0]}의 추억`;
             document.getElementById('step2-title').style.color = currentSeason.textColor;
             document.getElementById('upload-box').style.borderColor = currentSeason.accent;
@@ -224,7 +223,6 @@
             document.getElementById('upload-icon-bg').style.backgroundColor = currentSeason.fallbackColor;
             document.getElementById('upload-icon').style.color = currentSeason.textColor;
             
-            // 입력 초기화
             document.getElementById('photo-input').value = "";
             setStep(2);
         }
@@ -248,10 +246,12 @@
         });
 
         async function generateFrame(photoSrc) {
-            // 로딩 UI 표시
             document.getElementById('photo-input').disabled = true;
             document.getElementById('upload-default-ui').style.display = 'none';
             document.getElementById('loading-ui').style.display = 'flex';
+            
+            // 박스 터치 방지 (로딩중 중복클릭 방지)
+            document.getElementById('upload-box').onclick = null;
 
             try {
                 await document.fonts.ready;
@@ -272,7 +272,6 @@
                 canvas.width = cw;
                 canvas.height = ch;
 
-                // 배경 그리기
                 if (bgImg) {
                     const bgRatio = bgImg.width / bgImg.height;
                     const canvasRatio = cw / ch;
@@ -290,7 +289,6 @@
                     ctx.fillRect(0, 0, cw, ch);
                 }
 
-                // 매트 그리기
                 const matteMargin = 80;
                 ctx.shadowColor = "rgba(0,0,0,0.3)";
                 ctx.shadowBlur = 40;
@@ -303,7 +301,6 @@
                 ctx.lineWidth = 1;
                 ctx.strokeRect(matteMargin+15, matteMargin+15, cw - matteMargin*2 - 30, ch - matteMargin*2 - 30);
 
-                // 사진 그리기
                 const photoMargin = 60;
                 const targetX = matteMargin + photoMargin;
                 const targetY = matteMargin + photoMargin;
@@ -324,7 +321,6 @@
                 ctx.strokeStyle = "rgba(0,0,0,0.1)";
                 ctx.strokeRect(targetX, targetY, targetW, targetH);
 
-                // 텍스트 그리기
                 const textCenterY = targetY + targetH + 90;
                 ctx.fillStyle = currentSeason.textColor;
                 ctx.textAlign = 'center';
@@ -342,7 +338,6 @@
                 ctx.fillStyle = '#6b7280'; 
                 ctx.fillText(currentSeason.desc, cw / 2, textCenterY + 110);
 
-                // 로고 그리기
                 if (logoImg) {
                     const logoH = 55; 
                     const logoW = logoImg.width * (logoH / logoImg.height); 
@@ -355,7 +350,6 @@
 
                 generatedImageUrl = canvas.toDataURL('image/png', 1.0);
                 
-                // 결과 UI 업데이트
                 document.getElementById('final-image').src = generatedImageUrl;
                 document.getElementById('result-img-container').className = `w-full flex-shrink-0 relative flex flex-col items-center ${isLandscape ? 'max-w-[550px]' : 'max-w-[320px] sm:max-w-[420px]'}`;
                 document.getElementById('result-desc').innerText = `장성숲체원의 ${currentSeason.name.split(',')[0]} 풍경을 액자 프레임으로 활용하여 갤러리 감성의 작품을 완성했습니다. 기기에 저장하여 오랫동안 간직해 보세요.`;
@@ -369,30 +363,23 @@
                 document.getElementById('photo-input').disabled = false;
                 document.getElementById('upload-default-ui').style.display = 'flex';
                 document.getElementById('loading-ui').style.display = 'none';
+                // 다시 이벤트 복구
+                document.getElementById('upload-box').onclick = () => document.getElementById('photo-input').click();
             }
         }
 
-        async function handleDownload() {
+        // 안정적인 직접 다운로드 실행 (모바일 오류 최소화)
+        function handleDownload() {
             if (!generatedImageUrl) return;
-            try {
-                const response = await fetch(generatedImageUrl);
-                const blob = await response.blob();
-                const blobUrl = window.URL.createObjectURL(blob);
-                
-                const link = document.createElement('a');
-                link.href = blobUrl;
-                link.download = `Jangseong_Memory_${currentSeason.id}.png`;
-                
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-                
-                setTimeout(() => window.URL.revokeObjectURL(blobUrl), 200);
-            } catch (error) {
-                alert("다운로드가 차단되었습니다. 모바일 환경이라면 이미지를 길게 눌러서 '사진 저장'을 선택해주세요.");
-            }
+            const link = document.createElement('a');
+            link.href = generatedImageUrl;
+            link.download = `Jangseong_Memory_${currentSeason.id}.png`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
         }
     </script>
 </body>
 </html>
+
 
