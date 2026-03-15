@@ -53,12 +53,14 @@
                 </div>
             </div>
             
-            <div class="flex items-center gap-2 sm:gap-4 mt-3 sm:mt-0 text-[11px] sm:text-sm font-medium text-stone-400">
-                <span id="nav-step-1" class="transition-colors duration-300 text-stone-800 font-bold">1. 계절</span>
-                <i data-lucide="chevron-right" class="w-3 h-3 opacity-50"></i>
-                <span id="nav-step-2" class="transition-colors duration-300">2. 사진</span>
-                <i data-lucide="chevron-right" class="w-3 h-3 opacity-50"></i>
-                <span id="nav-step-3" class="transition-colors duration-300">3. 완성</span>
+            <div class="flex items-center gap-2 sm:gap-4 mt-3 sm:mt-0 text-[10px] sm:text-sm font-medium text-stone-400">
+                <span id="nav-step-1" class="transition-colors duration-300 text-stone-800 font-bold whitespace-nowrap">1. 계절</span>
+                <i data-lucide="chevron-right" class="w-3 h-3 opacity-50 flex-shrink-0"></i>
+                <span id="nav-step-2" class="transition-colors duration-300 whitespace-nowrap">2. 프레임</span>
+                <i data-lucide="chevron-right" class="w-3 h-3 opacity-50 flex-shrink-0"></i>
+                <span id="nav-step-3" class="transition-colors duration-300 whitespace-nowrap">3. 사진</span>
+                <i data-lucide="chevron-right" class="w-3 h-3 opacity-50 flex-shrink-0"></i>
+                <span id="nav-step-4" class="transition-colors duration-300 whitespace-nowrap">4. 완성</span>
             </div>
         </div>
 
@@ -72,54 +74,79 @@
                     당신의 장성숲체원은<br class="hidden sm:block"/> 어떤 계절이었나요?
                 </h2>
                 <p class="text-stone-500 mb-8 sm:mb-12 text-sm sm:text-lg font-gowun keep-all px-4">
-                    가장 찬란했던 풍경을 선택하여 아름다운 액자를 완성해 보세요.
+                    가장 찬란했던 풍경을 선택하여 아름다운 앨범을 만들어 보세요.
                 </p>
                 
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6" id="season-buttons">
-                    <!-- JS에서 버튼들이 동적으로 생성됩니다 -->
+                    <!-- JS 렌더링 -->
                 </div>
             </div>
 
-            <!-- STEP 2: 사진 업로드 -->
+            <!-- STEP 2: 프레임(장수) 선택 -->
             <div id="step-2" class="hidden-step w-full text-center animate-fade-up flex-col items-center mt-4 sm:mt-0">
-                <h2 id="step2-title" class="text-3xl sm:text-4xl font-serif-kr mb-3 sm:mb-4 keep-all">계절의 추억</h2>
-                <p class="text-stone-500 mb-6 sm:mb-10 text-sm sm:text-lg font-gowun keep-all px-4">
-                    선택하신 풍경 테마에 맞춰 고화질 갤러리 액자를 제작합니다.
+                <h2 id="step2-title-frame" class="text-3xl sm:text-4xl font-serif-kr mb-3 sm:mb-4 keep-all text-stone-800">프레임 선택</h2>
+                <p class="text-stone-500 mb-8 sm:mb-12 text-sm sm:text-lg font-gowun keep-all px-4">
+                    앨범에 담을 사진 개수와 프레임 모양을 선택해 주세요.
                 </p>
                 
-                <!-- 터치 시 직접 파일창이 열리지 않고 권한 묻기 팝업 호출 -->
-                <div id="upload-box" onclick="openModal('upload')" class="cursor-pointer w-full max-w-[500px] aspect-square rounded-2xl border-[1.5px] border-dashed flex items-center justify-center relative overflow-hidden transition-all duration-300 hover:shadow-xl group bg-white mx-auto shadow-sm">
+                <div class="grid grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 w-full max-w-4xl mx-auto" id="layout-buttons">
+                    <!-- JS 렌더링 -->
+                </div>
+                
+                <button onclick="setStep(1)" class="mt-8 sm:mt-10 px-6 py-3 text-stone-500 hover:text-stone-800 font-gowun transition-colors active:scale-95 bg-white sm:bg-transparent rounded-full border sm:border-0 border-stone-200 shadow-sm sm:shadow-none">
+                    ← 계절 다시 선택하기
+                </button>
+            </div>
+
+            <!-- STEP 3: 사진 업로드 -->
+            <div id="step-3" class="hidden-step w-full text-center animate-fade-up flex-col items-center mt-4 sm:mt-0">
+                <h2 id="step3-title" class="text-3xl sm:text-4xl font-serif-kr mb-3 sm:mb-4 keep-all">계절의 추억</h2>
+                <p id="upload-instruction-text" class="text-stone-500 mb-6 sm:mb-10 text-sm sm:text-lg font-gowun keep-all px-4">
+                    선택하신 프레임에 맞게 정확히 사진을 선택해주세요.
+                </p>
+                
+                <div id="upload-box-empty" onclick="handleAddPhotoClick()" class="cursor-pointer w-full max-w-[500px] aspect-square rounded-2xl border-[1.5px] border-dashed flex items-center justify-center relative overflow-hidden transition-all duration-300 hover:shadow-xl group bg-white mx-auto shadow-sm">
                     <div id="upload-bg-tint" class="absolute inset-0 opacity-[0.03]"></div>
-                    
-                    <!-- 파일 인풋은 화면에서 숨깁니다 -->
-                    <input type="file" id="photo-input" accept="image/*" class="hidden" />
-                    
-                    <div id="upload-default-ui" class="flex flex-col items-center gap-3 sm:gap-5 p-4 sm:p-8 transition-transform duration-500 group-hover:scale-105 relative z-10 pointer-events-none">
+                    <div class="flex flex-col items-center gap-3 sm:gap-5 p-4 sm:p-8 transition-transform duration-500 group-hover:scale-105 relative z-10 pointer-events-none">
                         <div id="upload-icon-bg" class="w-16 h-16 sm:w-20 sm:h-20 rounded-full flex items-center justify-center shadow-sm">
-                            <i data-lucide="upload-cloud" id="upload-icon" class="w-6 h-6 sm:w-8 sm:h-8" stroke-width="1.5"></i>
+                            <i data-lucide="images" id="upload-icon" class="w-6 h-6 sm:w-8 sm:h-8" stroke-width="1.5"></i>
                         </div>
                         <div class="text-stone-700 font-serif-kr text-xl sm:text-2xl">여기를 터치하여 사진 선택</div>
                         <div class="text-stone-400 font-gowun text-xs sm:text-sm tracking-wide bg-stone-100 px-3 py-1 rounded-full">스마트폰 앨범에서 바로 선택</div>
                     </div>
+                </div>
 
-                    <!-- 로딩 UI -->
-                    <div id="loading-ui" class="hidden flex-col items-center gap-3 sm:gap-4 p-4 sm:p-8 relative z-10">
-                        <div class="w-10 h-10 border-4 border-stone-200 border-t-stone-800 rounded-full animate-spin"></div>
-                        <div class="text-stone-600 font-serif-kr text-lg mt-2">프레임 제작 중...</div>
+                <div id="photo-selection-ui" class="hidden w-full max-w-2xl mx-auto flex-col items-center">
+                    <div id="photo-grid" class="grid grid-cols-2 sm:grid-cols-4 gap-4 w-full mb-8">
+                        <!-- 선택된 사진 섬네일 렌더링 -->
+                    </div>
+                    
+                    <div class="flex flex-col sm:flex-row gap-4 w-full max-w-sm mx-auto">
+                        <button id="btn-make-album" onclick="startGenerateFrame()" style="display:none;" class="flex-1 py-4 sm:py-5 px-6 rounded-2xl font-serif-kr text-lg text-white transition-all active:scale-95 shadow-md justify-center items-center gap-2">
+                            <i data-lucide="sparkles" class="w-5 h-5"></i>
+                            <span id="btn-make-album-text">앨범 만들기</span>
+                        </button>
                     </div>
                 </div>
+
+                <div id="loading-ui" class="hidden flex-col items-center gap-3 sm:gap-4 p-8 relative z-10 mt-8">
+                    <div class="w-12 h-12 border-4 border-stone-200 border-t-stone-800 rounded-full animate-spin"></div>
+                    <div class="text-stone-600 font-serif-kr text-xl mt-2">앨범 프레임 구성 중...</div>
+                </div>
                 
-                <button onclick="handleReset()" class="mt-8 sm:mt-10 px-6 py-3 text-stone-500 hover:text-stone-800 font-gowun transition-colors active:scale-95 bg-white sm:bg-transparent rounded-full border sm:border-0 border-stone-200 shadow-sm sm:shadow-none">
-                    ← 처음으로 돌아가기
+                <input type="file" id="photo-input" accept="image/*" multiple class="hidden" />
+                
+                <button id="btn-back-step2" onclick="setStep(2)" class="mt-8 sm:mt-10 px-6 py-3 text-stone-500 hover:text-stone-800 font-gowun transition-colors active:scale-95 bg-white sm:bg-transparent rounded-full border sm:border-0 border-stone-200 shadow-sm sm:shadow-none">
+                    ← 프레임 다시 선택하기
                 </button>
             </div>
 
-            <!-- STEP 3: 결과 확인 및 다운로드 -->
-            <div id="step-3" class="hidden-step w-full animate-fade-up flex-col lg:flex-row gap-8 lg:gap-16 items-center justify-center max-w-6xl mt-2 sm:mt-0">
+            <!-- STEP 4: 결과 확인 및 다운로드 -->
+            <div id="step-4" class="hidden-step w-full animate-fade-up flex-col lg:flex-row gap-8 lg:gap-16 items-center justify-center max-w-6xl mt-2 sm:mt-0">
                 
                 <div id="result-img-container" class="w-full flex-shrink-0 relative flex flex-col items-center">
                     <div class="absolute inset-0 bg-black/10 blur-xl translate-y-4 sm:translate-y-6 rounded-3xl"></div>
-                    <img id="final-image" src="" alt="사계절 풍경 액자" class="w-full h-auto max-h-[50vh] sm:max-h-[65vh] object-contain block relative z-10 shadow-[0_15px_30px_rgba(0,0,0,0.15)] border border-stone-200/50 rounded-sm" />
+                    <img id="final-image" src="" alt="사계절 풍경 앨범 액자" class="w-full h-auto max-h-[50vh] sm:max-h-[65vh] object-contain block relative z-10 shadow-[0_15px_30px_rgba(0,0,0,0.15)] border border-stone-200/50 rounded-sm" />
                 </div>
 
                 <div class="flex flex-col gap-6 text-left max-w-md w-full px-4 sm:px-0 mt-6 sm:mt-0">
@@ -129,12 +156,11 @@
                     </div>
 
                     <div class="flex flex-col gap-3 mt-2">
-                        <!-- 터치 시 바로 다운로드하지 않고 다운로드 팝업 호출 -->
                         <button id="download-btn" onclick="openModal('download')" class="w-full flex items-center justify-center gap-3 py-4 sm:py-5 px-6 rounded-xl sm:rounded-2xl font-serif-kr text-lg sm:text-xl text-white transition-all duration-300 active:scale-95 hover:shadow-lg hover:-translate-y-1 shadow-md">
-                            <i data-lucide="download" class="w-5 h-5"></i> 고화질 이미지 저장
+                            <i data-lucide="download" class="w-5 h-5"></i> 고화질 앨범 저장
                         </button>
                         <button onclick="handleReset()" class="w-full flex items-center justify-center gap-2 py-4 px-6 rounded-xl sm:rounded-2xl font-gowun text-base sm:text-lg bg-stone-200/50 text-stone-700 hover:bg-stone-200 transition-colors active:scale-95 border border-transparent">
-                            <i data-lucide="rotate-ccw" class="w-4 h-4 opacity-70"></i> 다른 사진으로 다시 만들기
+                            <i data-lucide="rotate-ccw" class="w-4 h-4 opacity-70"></i> 처음부터 다시 만들기
                         </button>
                     </div>
                 </div>
@@ -162,38 +188,68 @@
 
     <!-- JavaScript 로직 -->
     <script>
-        // 사계절 데이터
+        // 사계절 데이터 (사용자가 직접 올린 파일 이름으로 변경)
         const SEASON_DATA = {
-            spring: { id: 'spring', name: '봄, 흩날리다', bgImage: 'https://images.unsplash.com/photo-1493246507139-91e8fad9978e?auto=format&fit=crop&w=1200&q=80', textColor: '#8e5568', accent: '#d8b4e2', icon: 'flower-2', fallbackColor: '#fdfbfb', desc: '따스한 햇살 아래, 벚꽃과 함께한 화사한 봄날의 기억' },
-            summer: { id: 'summer', name: '여름, 짙어지다', bgImage: 'https://images.unsplash.com/photo-1511497584788-876760111969?auto=format&fit=crop&w=1200&q=80', textColor: '#3a5f4c', accent: '#8db596', icon: 'sun', fallbackColor: '#f7fbf9', desc: '싱그러운 잎사귀 사이로 스며든 눈부신 여름날의 활기' },
-            autumn: { id: 'autumn', name: '가을, 물들다', bgImage: 'https://images.unsplash.com/photo-1477414348463-c0eb7f1359b6?auto=format&fit=crop&w=1200&q=80', textColor: '#7a4b3a', accent: '#d4a373', icon: 'leaf', fallbackColor: '#fdfbf8', desc: '붉게 물든 단풍길을 걸으며 나눈 깊고 따뜻한 가을의 정취' },
-            winter: { id: 'winter', name: '겨울, 포근하다', bgImage: 'https://images.unsplash.com/photo-1453306458620-5bbef13a5bca?auto=format&fit=crop&w=1200&q=80', textColor: '#4a5b6c', accent: '#a2b9ce', icon: 'snowflake', fallbackColor: '#f8f9fa', desc: '소리 없이 내린 하얀 눈처럼 고요하고 포근했던 겨울날의 휴식' }
+            spring: { id: 'spring', name: '봄, 흩날리다', bgImage: 'spring.jpg', textColor: '#8e5568', accent: '#d8b4e2', icon: 'flower-2', fallbackColor: '#fdfbfb', desc: '따스한 햇살 아래, 벚꽃과 함께한 화사한 봄날의 기억' },
+            summer: { id: 'summer', name: '여름, 짙어지다', bgImage: 'summer.jpg', textColor: '#3a5f4c', accent: '#8db596', icon: 'sun', fallbackColor: '#f7fbf9', desc: '싱그러운 잎사귀 사이로 스며든 눈부신 여름날의 활기' },
+            autumn: { id: 'autumn', name: '가을, 물들다', bgImage: 'autumn.jpg', textColor: '#7a4b3a', accent: '#d4a373', icon: 'leaf', fallbackColor: '#fdfbf8', desc: '붉게 물든 단풍길을 걸으며 나눈 깊고 따뜻한 가을의 정취' },
+            winter: { id: 'winter', name: '겨울, 포근하다', bgImage: 'winter.jpg', textColor: '#4a5b6c', accent: '#a2b9ce', icon: 'snowflake', fallbackColor: '#f8f9fa', desc: '소리 없이 내린 하얀 눈처럼 고요하고 포근했던 겨울날의 휴식' }
         };
 
+        // 프레임 레이아웃 데이터
+        const LAYOUT_DATA = [
+            { id: '1-full', count: 1, name: '1장 (기본)', icon: '<div class="w-full h-full bg-stone-400 rounded shadow-sm border border-black/10"></div>' },
+            { id: '2-horizontal', count: 2, name: '2장 (가로 분할)', icon: '<div class="flex flex-col gap-[3px] w-full h-full"><div class="w-full h-1/2 bg-stone-400 rounded shadow-sm border border-black/10"></div><div class="w-full h-1/2 bg-stone-400 rounded shadow-sm border border-black/10"></div></div>' },
+            { id: '2-vertical', count: 2, name: '2장 (세로 분할)', icon: '<div class="flex gap-[3px] w-full h-full"><div class="w-1/2 h-full bg-stone-400 rounded shadow-sm border border-black/10"></div><div class="w-1/2 h-full bg-stone-400 rounded shadow-sm border border-black/10"></div></div>' },
+            { id: '3-top', count: 3, name: '3장 (상단 강조)', icon: '<div class="flex flex-col gap-[3px] w-full h-full"><div class="w-full h-1/2 bg-stone-400 rounded shadow-sm border border-black/10"></div><div class="flex gap-[3px] w-full h-1/2"><div class="w-1/2 h-full bg-stone-400 rounded shadow-sm border border-black/10"></div><div class="w-1/2 h-full bg-stone-400 rounded shadow-sm border border-black/10"></div></div></div>' },
+            { id: '3-left', count: 3, name: '3장 (좌측 강조)', icon: '<div class="flex gap-[3px] w-full h-full"><div class="w-1/2 h-full bg-stone-400 rounded shadow-sm border border-black/10"></div><div class="flex flex-col gap-[3px] w-1/2 h-full"><div class="w-full h-1/2 bg-stone-400 rounded shadow-sm border border-black/10"></div><div class="w-full h-1/2 bg-stone-400 rounded shadow-sm border border-black/10"></div></div></div>' },
+            { id: '4-grid', count: 4, name: '4장 (그리드)', icon: '<div class="flex flex-col gap-[3px] w-full h-full"><div class="flex gap-[3px] w-full h-1/2"><div class="w-1/2 h-full bg-stone-400 rounded shadow-sm border border-black/10"></div><div class="w-1/2 h-full bg-stone-400 rounded shadow-sm border border-black/10"></div></div><div class="flex gap-[3px] w-full h-1/2"><div class="w-1/2 h-full bg-stone-400 rounded shadow-sm border border-black/10"></div><div class="w-1/2 h-full bg-stone-400 rounded shadow-sm border border-black/10"></div></div></div>' }
+        ];
+
         let currentSeason = null;
+        let selectedLayout = null;
         let generatedImageUrl = null;
-        let modalPendingAction = null; // 모달에서 확인 버튼 클릭 시 실행할 함수 저장
+        let modalPendingAction = null; 
+        
+        let selectedPhotos = []; 
+        let hasPromptedUpload = false; 
 
-        // 아이콘 초기화
-        lucide.createIcons();
+        // 초기 화면 버튼 동적 생성
+        function initApp() {
+            lucide.createIcons();
 
-        // 초기 화면 세팅 (버튼 동적 생성)
-        const buttonsContainer = document.getElementById('season-buttons');
-        Object.values(SEASON_DATA).forEach(season => {
-            const btnHtml = `
-                <button onclick="handleSeasonSelect('${season.id}')" class="group flex flex-col items-center p-6 sm:p-8 rounded-2xl transition-all duration-500 active:scale-95 hover:-translate-y-2 hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.2)] relative overflow-hidden h-48 sm:h-64 justify-end border border-transparent hover:border-white/50 w-full">
-                    <div class="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110" style="background-image: url('${season.bgImage}')"></div>
-                    <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/10 transition-opacity duration-300 group-hover:opacity-90"></div>
-                    <div class="relative z-10 flex flex-col items-center text-white w-full">
-                        <i data-lucide="${season.icon}" stroke-width="1.5" class="w-8 h-8 sm:w-10 sm:h-10 mb-2 sm:mb-3 opacity-90"></i>
-                        <span class="text-xl sm:text-2xl font-serif-kr font-semibold mb-1 tracking-wide text-white">${season.name.split(',')[0]}</span>
-                        <span class="hidden sm:block text-xs text-white/80 keep-all leading-relaxed font-gowun mt-1 px-4 text-center">${season.desc}</span>
-                    </div>
-                </button>
-            `;
-            buttonsContainer.innerHTML += btnHtml;
-        });
-        lucide.createIcons(); 
+            // 계절 버튼 렌더링
+            const seasonContainer = document.getElementById('season-buttons');
+            Object.values(SEASON_DATA).forEach(season => {
+                seasonContainer.innerHTML += `
+                    <button onclick="handleSeasonSelect('${season.id}')" class="group flex flex-col items-center p-6 sm:p-8 rounded-2xl transition-all duration-500 active:scale-95 hover:-translate-y-2 hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.2)] relative overflow-hidden h-48 sm:h-64 justify-end border border-transparent hover:border-white/50 w-full">
+                        <div class="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110" style="background-image: url('${season.bgImage}')"></div>
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/10 transition-opacity duration-300 group-hover:opacity-90"></div>
+                        <div class="relative z-10 flex flex-col items-center text-white w-full">
+                            <i data-lucide="${season.icon}" stroke-width="1.5" class="w-8 h-8 sm:w-10 sm:h-10 mb-2 sm:mb-3 opacity-90"></i>
+                            <span class="text-xl sm:text-2xl font-serif-kr font-semibold mb-1 tracking-wide text-white">${season.name.split(',')[0]}</span>
+                            <span class="hidden sm:block text-xs text-white/80 keep-all leading-relaxed font-gowun mt-1 px-4 text-center">${season.desc}</span>
+                        </div>
+                    </button>
+                `;
+            });
+
+            // 프레임 버튼 렌더링
+            const layoutContainer = document.getElementById('layout-buttons');
+            LAYOUT_DATA.forEach(layout => {
+                layoutContainer.innerHTML += `
+                    <button onclick="handleLayoutSelect('${layout.id}')" class="group flex flex-col items-center p-4 sm:p-6 bg-white border border-stone-200 rounded-2xl hover:border-stone-400 hover:shadow-md transition-all active:scale-95">
+                        <div class="w-16 h-16 sm:w-20 sm:h-20 p-2 sm:p-3 bg-stone-100 rounded-xl mb-3 sm:mb-4 flex items-center justify-center group-hover:bg-stone-200 transition-colors">
+                            ${layout.icon}
+                        </div>
+                        <span class="font-serif-kr text-base sm:text-lg text-stone-800 font-semibold tracking-wide">${layout.name}</span>
+                    </button>
+                `;
+            });
+
+            lucide.createIcons(); 
+        }
+        initApp();
 
         // ====== 커스텀 팝업 (모달) 로직 ======
         function openModal(type) {
@@ -205,29 +261,25 @@
 
             if (type === 'upload') {
                 title.innerText = '사진첩 접근 권한';
-                desc.innerText = '아름다운 액자를 만들기 위해 기기의 갤러리(사진첩)에 접근하시겠습니까?';
+                desc.innerText = `아름다운 앨범을 만들기 위해 기기의 갤러리에 접근하시겠습니까? (총 ${selectedLayout.count}장 선택 필요)`;
                 iconContainer.innerHTML = '<i data-lucide="image-plus" class="w-7 h-7 text-green-600"></i>';
-                
                 confirmBtn.innerText = '허용하기';
                 confirmBtn.className = 'flex-1 py-4 text-green-600 font-bold font-gowun text-lg border-l border-stone-100 hover:bg-white transition-colors active:bg-stone-50';
                 
-                modalPendingAction = () => {
-                    document.getElementById('photo-input').click();
+                modalPendingAction = () => { 
+                    hasPromptedUpload = true;
+                    document.getElementById('photo-input').click(); 
                 };
             } else if (type === 'download') {
-                title.innerText = '이미지 다운로드';
-                desc.innerText = '완성된 고화질 액자 이미지를 내 기기에 저장하시겠습니까?';
+                title.innerText = '앨범 다운로드';
+                desc.innerText = '완성된 고화질 앨범 이미지를 내 기기에 저장하시겠습니까?';
                 iconContainer.innerHTML = '<i data-lucide="download-cloud" class="w-7 h-7 text-blue-600"></i>';
-                
                 confirmBtn.innerText = '다운로드';
                 confirmBtn.className = 'flex-1 py-4 text-blue-600 font-bold font-gowun text-lg border-l border-stone-100 hover:bg-white transition-colors active:bg-stone-50';
-                
-                modalPendingAction = () => {
-                    executeDownload();
-                };
+                modalPendingAction = () => { executeDownload(); };
             }
 
-            lucide.createIcons(); // 아이콘 리렌더링
+            lucide.createIcons(); 
             modal.classList.remove('hidden');
         }
 
@@ -242,6 +294,15 @@
         });
         // ===================================
 
+        // 사진 추가 클릭
+        function handleAddPhotoClick() {
+            if (!hasPromptedUpload) {
+                openModal('upload');
+            } else {
+                document.getElementById('photo-input').click();
+            }
+        }
+
         const loadImg = (src, isExternal = false) => {
             return new Promise((resolve, reject) => {
                 const img = new Image();
@@ -253,81 +314,189 @@
         };
 
         function setStep(step) {
-            document.getElementById('step-1').classList.add('hidden-step');
-            document.getElementById('step-2').classList.add('hidden-step');
-            document.getElementById('step-2').classList.remove('flex');
-            document.getElementById('step-3').classList.add('hidden-step');
-            document.getElementById('step-3').classList.remove('flex');
-            
-            document.getElementById('nav-step-1').classList.remove('text-stone-800', 'font-bold');
-            document.getElementById('nav-step-2').classList.remove('text-stone-800', 'font-bold');
-            document.getElementById('nav-step-3').classList.remove('text-stone-800', 'font-bold');
-
-            if (step === 1) {
-                document.getElementById('step-1').classList.remove('hidden-step');
-                document.getElementById('nav-step-1').classList.add('text-stone-800', 'font-bold');
-            } else if (step === 2) {
-                document.getElementById('step-2').classList.remove('hidden-step');
-                document.getElementById('step-2').classList.add('flex');
-                document.getElementById('nav-step-2').classList.add('text-stone-800', 'font-bold');
-            } else if (step === 3) {
-                document.getElementById('step-3').classList.remove('hidden-step');
-                document.getElementById('step-3').classList.add('flex');
-                document.getElementById('nav-step-3').classList.add('text-stone-800', 'font-bold');
-            }
+            [1, 2, 3, 4].forEach(s => {
+                const el = document.getElementById(`step-${s}`);
+                const nav = document.getElementById(`nav-step-${s}`);
+                if (el) {
+                    if (s === step) {
+                        el.classList.remove('hidden-step');
+                        if (s > 1) el.classList.add('flex');
+                    } else {
+                        el.classList.add('hidden-step');
+                        if (s > 1) el.classList.remove('flex');
+                    }
+                }
+                if (nav) {
+                    if (s === step) nav.classList.add('text-stone-800', 'font-bold');
+                    else nav.classList.remove('text-stone-800', 'font-bold');
+                }
+            });
         }
 
+        // STEP 1 -> STEP 2 (계절 -> 프레임)
         function handleSeasonSelect(seasonId) {
             currentSeason = SEASON_DATA[seasonId];
+            document.getElementById('step2-title-frame').style.color = currentSeason.textColor;
+            setStep(2);
+        }
+
+        // STEP 2 -> STEP 3 (프레임 -> 사진 업로드)
+        function handleLayoutSelect(layoutId) {
+            selectedLayout = LAYOUT_DATA.find(l => l.id === layoutId);
             
-            document.getElementById('step2-title').innerText = `${currentSeason.name.split(',')[0]}의 추억`;
-            document.getElementById('step2-title').style.color = currentSeason.textColor;
-            document.getElementById('upload-box').style.borderColor = currentSeason.accent;
+            document.getElementById('step3-title').innerText = `${currentSeason.name.split(',')[0]}의 추억`;
+            document.getElementById('step3-title').style.color = currentSeason.textColor;
+            document.getElementById('upload-box-empty').style.borderColor = currentSeason.accent;
             document.getElementById('upload-bg-tint').style.backgroundColor = currentSeason.textColor;
             document.getElementById('upload-icon-bg').style.backgroundColor = currentSeason.fallbackColor;
             document.getElementById('upload-icon').style.color = currentSeason.textColor;
             
+            document.getElementById('upload-instruction-text').innerText = `선택하신 ${selectedLayout.name} 모양에 맞게 총 ${selectedLayout.count}장을 앨범에 추가해 주세요.`;
+            
             document.getElementById('photo-input').value = "";
-            setStep(2);
+            selectedPhotos = []; 
+            updatePhotoSelectionUI();
+            setStep(3);
         }
 
         function handleReset() {
             currentSeason = null;
+            selectedLayout = null;
             generatedImageUrl = null;
+            selectedPhotos = [];
+            hasPromptedUpload = false;
+            document.getElementById('loading-ui').style.display = 'none';
             setStep(1);
         }
 
-        // 사진 파일이 선택되면 캔버스 합성을 시작합니다
-        document.getElementById('photo-input').addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = (event) => {
-                    generateFrame(event.target.result);
-                };
-                reader.readAsDataURL(file);
+        function updatePhotoSelectionUI() {
+            const emptyUI = document.getElementById('upload-box-empty');
+            const selectionUI = document.getElementById('photo-selection-ui');
+            const grid = document.getElementById('photo-grid');
+            const makeBtnText = document.getElementById('btn-make-album-text');
+            const makeBtn = document.getElementById('btn-make-album');
+
+            document.getElementById('btn-back-step2').style.display = 'inline-block';
+            document.getElementById('loading-ui').style.display = 'none';
+
+            if (selectedPhotos.length === 0) {
+                emptyUI.style.display = 'flex';
+                selectionUI.style.display = 'none';
+            } else {
+                emptyUI.style.display = 'none';
+                selectionUI.style.display = 'flex';
+                
+                grid.innerHTML = ''; 
+                
+                selectedPhotos.forEach((src, idx) => {
+                    grid.innerHTML += `
+                        <div class="relative aspect-square rounded-2xl overflow-hidden border border-stone-200 shadow-sm group">
+                            <img src="${src}" class="w-full h-full object-cover" />
+                            <button onclick="removePhoto(${idx})" class="absolute top-2 right-2 bg-black/60 text-white rounded-full p-1.5 hover:bg-black/80 transition-colors backdrop-blur-sm">
+                                <i data-lucide="x" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                    `;
+                });
+                
+                if (selectedPhotos.length < selectedLayout.count) {
+                    grid.innerHTML += `
+                        <button onclick="handleAddPhotoClick()" class="flex flex-col items-center justify-center aspect-square rounded-2xl border-2 border-dashed border-stone-300 bg-white/50 hover:bg-stone-100 transition-colors text-stone-500 shadow-sm">
+                            <i data-lucide="plus" class="w-8 h-8 mb-2 text-stone-400"></i>
+                            <span class="text-sm font-gowun font-bold">사진 추가</span>
+                            <span class="text-xs">(${selectedPhotos.length}/${selectedLayout.count})</span>
+                        </button>
+                    `;
+                }
+                
+                lucide.createIcons();
+
+                if (selectedPhotos.length === selectedLayout.count) {
+                    makeBtn.style.display = 'flex';
+                    makeBtnText.innerText = `${selectedLayout.count}장으로 앨범 만들기`;
+                    makeBtn.style.backgroundColor = currentSeason.textColor;
+                } else {
+                    makeBtn.style.display = 'none';
+                }
             }
+        }
+
+        function removePhoto(index) {
+            selectedPhotos.splice(index, 1);
+            updatePhotoSelectionUI();
+        }
+
+        // 사진 파일 이벤트 (제한된 개수에 맞춰 업로드)
+        document.getElementById('photo-input').addEventListener('change', async (e) => {
+            const files = Array.from(e.target.files);
+            
+            if (files.length > 0) {
+                const remainingSlots = selectedLayout.count - selectedPhotos.length;
+                const filesToAdd = files.slice(0, remainingSlots);
+
+                if (files.length > remainingSlots) {
+                    alert(`선택하신 프레임은 총 ${selectedLayout.count}장입니다. 초과된 사진은 제외되었습니다.`);
+                }
+
+                try {
+                    const photoSrcs = await Promise.all(filesToAdd.map(file => {
+                        return new Promise(resolve => {
+                            const reader = new FileReader();
+                            reader.onload = event => resolve(event.target.result);
+                            reader.readAsDataURL(file);
+                        });
+                    }));
+                    
+                    selectedPhotos = selectedPhotos.concat(photoSrcs);
+                    updatePhotoSelectionUI();
+                } catch (error) {
+                    console.error("파일 읽기 오류:", error);
+                }
+            }
+            e.target.value = "";
         });
 
-        async function generateFrame(photoSrc) {
-            document.getElementById('photo-input').disabled = true;
-            document.getElementById('upload-default-ui').style.display = 'none';
+        // Cover 그리기 헬퍼
+        function drawImageCover(ctx, img, boxX, boxY, boxW, boxH) {
+            const imgRatio = img.width / img.height;
+            const targetRatio = boxW / boxH;
+            let sX, sY, sW, sH;
+
+            if (imgRatio > targetRatio) {
+                sH = img.height; sW = img.height * targetRatio; sX = (img.width - sW) / 2; sY = 0;
+            } else {
+                sW = img.width; sH = img.width / targetRatio; sX = 0; sY = (img.height - sH) / 2;
+            }
+
+            ctx.drawImage(img, sX, sY, sW, sH, boxX, boxY, boxW, boxH);
+            
+            ctx.strokeStyle = "rgba(0,0,0,0.1)";
+            ctx.lineWidth = 1;
+            ctx.strokeRect(boxX, boxY, boxW, boxH);
+        }
+
+        // 앨범 생성
+        async function startGenerateFrame() {
+            if (selectedPhotos.length !== selectedLayout.count) return;
+            
+            document.getElementById('photo-selection-ui').style.display = 'none';
+            document.getElementById('btn-back-step2').style.display = 'none';
             document.getElementById('loading-ui').style.display = 'flex';
             
-            // 로딩 중 박스 클릭 방지
-            document.getElementById('upload-box').onclick = null;
-
             try {
                 await document.fonts.ready;
                 
-                const userImg = await loadImg(photoSrc);
+                const userImgs = await Promise.all(selectedPhotos.map(src => loadImg(src)));
+                
                 let bgImg = null;
                 let logoImg = null;
-
-                try { bgImg = await loadImg(currentSeason.bgImage, true); } catch(e) {}
+                // 로컬 이미지이므로 CORS 옵션(true)을 제거하여 원활하게 로드되도록 수정
+                try { bgImg = await loadImg(currentSeason.bgImage); } catch(e) {}
                 try { logoImg = await loadImg('50436.png'); } catch(e) {}
 
-                const isLandscape = userImg.width > userImg.height;
+                // 1장이고 전체 레이아웃일 때만 가로/세로 방향 유동적 변경, 그 외는 포스터형 고정
+                const isLandscape = (selectedLayout.id === '1-full' && userImgs[0].width > userImgs[0].height);
+                
                 const canvas = document.createElement('canvas');
                 const ctx = canvas.getContext('2d');
 
@@ -345,8 +514,12 @@
                     } else {
                         bgSw = bgImg.width; bgSh = bgImg.width / canvasRatio; bgSx = 0; bgSy = (bgImg.height - bgSh) / 2;
                     }
+                    
+                    ctx.filter = 'brightness(1.15) saturate(1.1)';
                     ctx.drawImage(bgImg, bgSx, bgSy, bgSw, bgSh, 0, 0, cw, ch);
-                    ctx.fillStyle = "rgba(0, 0, 0, 0.15)";
+                    ctx.filter = 'none'; 
+                    
+                    ctx.fillStyle = "rgba(255, 255, 255, 0.25)";
                     ctx.fillRect(0, 0, cw, ch);
                 } else {
                     ctx.fillStyle = currentSeason.fallbackColor;
@@ -354,7 +527,7 @@
                 }
 
                 const matteMargin = 80;
-                ctx.shadowColor = "rgba(0,0,0,0.3)";
+                ctx.shadowColor = "rgba(0,0,0,0.2)"; 
                 ctx.shadowBlur = 40;
                 ctx.shadowOffsetY = 15;
                 ctx.fillStyle = '#ffffff';
@@ -371,19 +544,51 @@
                 const targetW = cw - matteMargin*2 - photoMargin*2;
                 const targetH = ch - matteMargin*2 - photoMargin - 320;
 
-                const imgRatio = userImg.width / userImg.height;
-                const targetRatio = targetW / targetH;
-                let sX, sY, sW, sH;
+                const gap = 30; 
+                const layouts = [];
 
-                if (imgRatio > targetRatio) {
-                    sH = userImg.height; sW = userImg.height * targetRatio; sX = (userImg.width - sW) / 2; sY = 0;
-                } else {
-                    sW = userImg.width; sH = userImg.width / targetRatio; sX = 0; sY = (userImg.height - sH) / 2;
+                // 선택된 프레임 ID를 바탕으로 좌표 할당
+                if (selectedLayout.id === '1-full') {
+                    layouts.push({ x: targetX, y: targetY, w: targetW, h: targetH });
+                } 
+                else if (selectedLayout.id === '2-horizontal') {
+                    const boxH = (targetH - gap) / 2;
+                    layouts.push({ x: targetX, y: targetY, w: targetW, h: boxH });
+                    layouts.push({ x: targetX, y: targetY + boxH + gap, w: targetW, h: boxH });
+                } 
+                else if (selectedLayout.id === '2-vertical') {
+                    const boxW = (targetW - gap) / 2;
+                    layouts.push({ x: targetX, y: targetY, w: boxW, h: targetH });
+                    layouts.push({ x: targetX + boxW + gap, y: targetY, w: boxW, h: targetH });
+                }
+                else if (selectedLayout.id === '3-top') {
+                    const boxH = (targetH - gap) / 2;
+                    const boxW_half = (targetW - gap) / 2;
+                    layouts.push({ x: targetX, y: targetY, w: targetW, h: boxH });
+                    layouts.push({ x: targetX, y: targetY + boxH + gap, w: boxW_half, h: boxH });
+                    layouts.push({ x: targetX + boxW_half + gap, y: targetY + boxH + gap, w: boxW_half, h: boxH });
+                } 
+                else if (selectedLayout.id === '3-left') {
+                    const boxW = (targetW - gap) / 2;
+                    const boxH_half = (targetH - gap) / 2;
+                    layouts.push({ x: targetX, y: targetY, w: boxW, h: targetH });
+                    layouts.push({ x: targetX + boxW + gap, y: targetY, w: boxW, h: boxH_half });
+                    layouts.push({ x: targetX + boxW + gap, y: targetY + boxH_half + gap, w: boxW, h: boxH_half });
+                }
+                else if (selectedLayout.id === '4-grid') {
+                    const boxW = (targetW - gap) / 2;
+                    const boxH = (targetH - gap) / 2;
+                    layouts.push({ x: targetX, y: targetY, w: boxW, h: boxH });
+                    layouts.push({ x: targetX + boxW + gap, y: targetY, w: boxW, h: boxH });
+                    layouts.push({ x: targetX, y: targetY + boxH + gap, w: boxW, h: boxH });
+                    layouts.push({ x: targetX + boxW + gap, y: targetY + boxH + gap, w: boxW, h: boxH });
                 }
 
-                ctx.drawImage(userImg, sX, sY, sW, sH, targetX, targetY, targetW, targetH);
-                ctx.strokeStyle = "rgba(0,0,0,0.1)";
-                ctx.strokeRect(targetX, targetY, targetW, targetH);
+                // 좌표에 맞게 사용자 이미지 삽입
+                userImgs.forEach((img, idx) => {
+                    const layout = layouts[idx];
+                    drawImageCover(ctx, img, layout.x, layout.y, layout.w, layout.h);
+                });
 
                 const textCenterY = targetY + targetH + 90;
                 ctx.fillStyle = currentSeason.textColor;
@@ -419,17 +624,11 @@
                 document.getElementById('result-desc').innerText = `장성숲체원의 ${currentSeason.name.split(',')[0]} 풍경을 액자 프레임으로 활용하여 갤러리 감성의 작품을 완성했습니다. 기기에 저장하여 오랫동안 간직해 보세요.`;
                 document.getElementById('download-btn').style.backgroundColor = currentSeason.textColor;
 
-                setStep(3);
+                setStep(4);
             } catch (error) {
                 alert("이미지 처리 중 오류가 발생했습니다.");
                 console.error(error);
-            } finally {
-                document.getElementById('photo-input').disabled = false;
-                document.getElementById('upload-default-ui').style.display = 'flex';
-                document.getElementById('loading-ui').style.display = 'none';
-                
-                // 작업 완료 후 다시 팝업을 띄우는 이벤트 연결
-                document.getElementById('upload-box').onclick = () => openModal('upload');
+                updatePhotoSelectionUI(); 
             }
         }
 
@@ -438,7 +637,7 @@
             if (!generatedImageUrl) return;
             const link = document.createElement('a');
             link.href = generatedImageUrl;
-            link.download = `Jangseong_Memory_${currentSeason.id}.png`;
+            link.download = `Jangseong_Memory_Album_${currentSeason.id}.png`;
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
@@ -446,5 +645,3 @@
     </script>
 </body>
 </html>
-
-
