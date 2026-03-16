@@ -196,6 +196,22 @@
             winter: { id: 'winter', name: '겨울, 포근하다', bgImage: 'winter.jpg', textColor: '#4a5b6c', accent: '#a2b9ce', icon: 'snowflake', fallbackColor: '#f8f9fa', desc: '소리 없이 내린 하얀 눈처럼 고요하고 포근했던 겨울날의 휴식' }
         };
 
+        // 월별 나무 데이터 추가
+        const MONTHLY_TREES = {
+            1: "동백나무 | 추위를 이겨내고 새날을 여는 강인함",
+            2: "매화나무 | 가장 먼저 봄을 알리는 햇살 같은 따뜻함",
+            3: "영춘화 | 샛노란 꽃으로 봄날을 밝히는 맑은 에너지",
+            4: "목련 | 수줍음을 깨고 활짝 피어나는 우아함",
+            5: "등나무 | 서로 기대며 함께 어우러지는 포용력",
+            6: "느티나무 | 커다란 그늘을 내어주는 품 넓은 넉넉함",
+            7: "무궁화 | 끊임없이 피어나며 날마다 새로운 끈기",
+            8: "배롱나무 | 뜨거운 볕 아래서도 환하게 웃는 열정",
+            9: "석류나무 | 단단함 속에 꿈을 가득 품은 보석 같은 결실",
+            10: "참나무 | 숲속 생명을 두루 품어주는 속 깊은 배려심",
+            11: "자작나무 | 추위를 견디며 내일로 나아가는 하얀 용기",
+            12: "소나무 | 사계절 내내 푸름을 잃지 않는 꿋꿋함"
+        };
+
         // 프레임 레이아웃 데이터
         const LAYOUT_DATA = [
             { id: '1-full', count: 1, name: '1장 (기본)', icon: '<div class="w-full h-full bg-stone-400 rounded shadow-sm border border-black/10"></div>' },
@@ -590,31 +606,39 @@
                     drawImageCover(ctx, img, layout.x, layout.y, layout.w, layout.h);
                 });
 
-                const textCenterY = targetY + targetH + 90;
+                // 텍스트 간격 조정 (월별 나무 텍스트가 들어갈 수 있도록 위로 살짝 당김)
+                const textCenterY = targetY + targetH + 80;
                 ctx.fillStyle = currentSeason.textColor;
                 ctx.textAlign = 'center';
                 ctx.font = '400 55px "Noto Serif KR", serif';
                 ctx.fillText(`장성숲체원에서의 기억`, cw / 2, textCenterY);
                 
                 ctx.beginPath();
-                ctx.moveTo(cw / 2 - 35, textCenterY + 45);
-                ctx.lineTo(cw / 2 + 35, textCenterY + 45);
+                ctx.moveTo(cw / 2 - 35, textCenterY + 40);
+                ctx.lineTo(cw / 2 + 35, textCenterY + 40);
                 ctx.strokeStyle = currentSeason.accent;
                 ctx.lineWidth = 2;
                 ctx.stroke();
 
                 ctx.font = '32px "Gowun Dodum", "Pretendard", sans-serif';
                 ctx.fillStyle = '#6b7280'; 
-                ctx.fillText(currentSeason.desc, cw / 2, textCenterY + 110);
+                ctx.fillText(currentSeason.desc, cw / 2, textCenterY + 100);
+
+                // 현재 시스템 날짜(월)를 가져와서 월별 나무 텍스트 렌더링
+                const currentMonth = new Date().getMonth() + 1; // getMonth()는 0부터 시작하므로 +1
+                const treeText = `${currentMonth}월 ${MONTHLY_TREES[currentMonth]}`;
+                ctx.font = '400 24px "Gowun Dodum", "Pretendard", sans-serif';
+                ctx.fillStyle = '#8a8886'; // 계절 설명보다 살짝 더 연한 회갈색 적용
+                ctx.fillText(treeText, cw / 2, textCenterY + 150);
 
                 if (logoImg) {
                     const logoH = 55; 
                     const logoW = logoImg.width * (logoH / logoImg.height); 
-                    ctx.drawImage(logoImg, cw/2 - logoW/2, ch - matteMargin - logoH - 40, logoW, logoH);
+                    ctx.drawImage(logoImg, cw/2 - logoW/2, ch - matteMargin - logoH - 30, logoW, logoH);
                 } else {
                     ctx.font = '300 22px "Pretendard", sans-serif';
                     ctx.fillStyle = '#9ca3af';
-                    ctx.fillText(`KOREA FOREST WELFARE INSTITUTE`, cw / 2, ch - matteMargin - 50);
+                    ctx.fillText(`KOREA FOREST WELFARE INSTITUTE`, cw / 2, ch - matteMargin - 40);
                 }
 
                 generatedImageUrl = canvas.toDataURL('image/png', 1.0);
