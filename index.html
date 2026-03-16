@@ -156,11 +156,12 @@
                     </div>
 
                     <div class="flex flex-col gap-3 mt-2">
+                        <!-- 터치 시 바로 다운로드하지 않고 다운로드 팝업 호출 -->
                         <button id="download-btn" onclick="openModal('download')" class="w-full flex items-center justify-center gap-3 py-4 sm:py-5 px-6 rounded-xl sm:rounded-2xl font-serif-kr text-lg sm:text-xl text-white transition-all duration-300 active:scale-95 hover:shadow-lg hover:-translate-y-1 shadow-md">
                             <i data-lucide="download" class="w-5 h-5"></i> 고화질 앨범 저장
                         </button>
                         <button onclick="handleReset()" class="w-full flex items-center justify-center gap-2 py-4 px-6 rounded-xl sm:rounded-2xl font-gowun text-base sm:text-lg bg-stone-200/50 text-stone-700 hover:bg-stone-200 transition-colors active:scale-95 border border-transparent">
-                            <i data-lucide="rotate-ccw" class="w-4 h-4 opacity-70"></i> 처음부터 다시 만들기
+                            <i data-lucide="rotate-ccw" class="w-4 h-4 opacity-70"></i> 다른 사진으로 다시 만들기
                         </button>
                     </div>
                 </div>
@@ -558,7 +559,7 @@
                 const targetX = matteMargin + photoMargin;
                 const targetY = matteMargin + photoMargin;
                 const targetW = cw - matteMargin*2 - photoMargin*2;
-                const targetH = ch - matteMargin*2 - photoMargin - 320;
+                const targetH = ch - matteMargin*2 - photoMargin - 360; // 텍스트 영역을 위해 공간 추가
 
                 const gap = 30; 
                 const layouts = [];
@@ -606,39 +607,39 @@
                     drawImageCover(ctx, img, layout.x, layout.y, layout.w, layout.h);
                 });
 
-                // 텍스트 간격 조정 (월별 나무 텍스트가 들어갈 수 있도록 위로 살짝 당김)
-                const textCenterY = targetY + targetH + 80;
+                // 액자 내부 글씨 크기 대폭 확대 및 레이아웃 재조정
+                const textCenterY = targetY + targetH + 90;
                 ctx.fillStyle = currentSeason.textColor;
                 ctx.textAlign = 'center';
-                ctx.font = '400 55px "Noto Serif KR", serif';
+                ctx.font = '400 70px "Noto Serif KR", serif';
                 ctx.fillText(`장성숲체원에서의 기억`, cw / 2, textCenterY);
                 
                 ctx.beginPath();
-                ctx.moveTo(cw / 2 - 35, textCenterY + 40);
-                ctx.lineTo(cw / 2 + 35, textCenterY + 40);
+                ctx.moveTo(cw / 2 - 40, textCenterY + 50);
+                ctx.lineTo(cw / 2 + 40, textCenterY + 50);
                 ctx.strokeStyle = currentSeason.accent;
                 ctx.lineWidth = 2;
                 ctx.stroke();
 
-                ctx.font = '32px "Gowun Dodum", "Pretendard", sans-serif';
+                ctx.font = '40px "Gowun Dodum", "Pretendard", sans-serif';
                 ctx.fillStyle = '#6b7280'; 
-                ctx.fillText(currentSeason.desc, cw / 2, textCenterY + 100);
+                ctx.fillText(currentSeason.desc, cw / 2, textCenterY + 110);
 
                 // 현재 시스템 날짜(월)를 가져와서 월별 나무 텍스트 렌더링
                 const currentMonth = new Date().getMonth() + 1; // getMonth()는 0부터 시작하므로 +1
                 const treeText = `${currentMonth}월 ${MONTHLY_TREES[currentMonth]}`;
-                ctx.font = '400 24px "Gowun Dodum", "Pretendard", sans-serif';
-                ctx.fillStyle = '#8a8886'; // 계절 설명보다 살짝 더 연한 회갈색 적용
-                ctx.fillText(treeText, cw / 2, textCenterY + 150);
+                ctx.font = '400 32px "Gowun Dodum", "Pretendard", sans-serif';
+                ctx.fillStyle = '#8a8886'; 
+                ctx.fillText(treeText, cw / 2, textCenterY + 160);
 
                 if (logoImg) {
                     const logoH = 55; 
                     const logoW = logoImg.width * (logoH / logoImg.height); 
-                    ctx.drawImage(logoImg, cw/2 - logoW/2, ch - matteMargin - logoH - 30, logoW, logoH);
+                    ctx.drawImage(logoImg, cw/2 - logoW/2, ch - matteMargin - logoH - 20, logoW, logoH);
                 } else {
-                    ctx.font = '300 22px "Pretendard", sans-serif';
+                    ctx.font = '300 28px "Pretendard", sans-serif';
                     ctx.fillStyle = '#9ca3af';
-                    ctx.fillText(`KOREA FOREST WELFARE INSTITUTE`, cw / 2, ch - matteMargin - 40);
+                    ctx.fillText(`KOREA FOREST WELFARE INSTITUTE`, cw / 2, ch - matteMargin - 30);
                 }
 
                 generatedImageUrl = canvas.toDataURL('image/png', 1.0);
