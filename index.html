@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>국립장성숲체원 포토앨범</title>
+    <title>장성숲체원 기억 보관소</title>
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -47,7 +47,7 @@
     <!-- 메인 컨테이너 -->
     <div class="w-full max-w-6xl bg-white sm:rounded-[2rem] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.1)] overflow-hidden flex flex-col min-h-screen sm:min-h-[750px] border-0 sm:border border-stone-200 relative">
         
-        <!-- 상단 헤더 -->
+        <!-- 상단 헤더 및 네비게이션 -->
         <div class="px-5 sm:px-10 py-4 sm:py-5 flex flex-col sm:flex-row justify-between items-center border-b border-stone-100 bg-white/90 backdrop-blur-md z-20 sticky top-0">
             <div class="flex items-center gap-3 w-full sm:w-auto justify-center sm:justify-start mb-3 sm:mb-0">
                 <img src="50436.png" alt="로고" class="h-8 sm:h-10 object-contain" onerror="this.style.display='none'; document.getElementById('fallback-logo').style.display='flex';">
@@ -195,7 +195,6 @@
 
     <!-- JavaScript 로직 -->
     <script>
-        // 월별 나무 데이터
         const MONTHLY_TREES = {
             1: "동백나무 | 추위를 이겨내고 새날을 여는 강인함",
             2: "매화나무 | 가장 먼저 봄을 알리는 햇살 같은 따뜻함",
@@ -211,7 +210,6 @@
             12: "소나무 | 사계절 내내 푸름을 잃지 않는 꿋꿋함"
         };
 
-        // 사계절 로컬 파일 설정 (spring.jpg, spring2.jpg, spring3.jpg 형식 적용)
         const SEASON_DATA = {
             spring: { 
                 id: 'spring', name: '봄, 흩날리다', thumbnail: 'spring.jpg', textColor: '#8e5568', accent: '#d8b4e2', icon: 'flower-2', fallbackColor: '#fdfbfb', desc: '따스한 햇살 아래, 벚꽃과 함께한 화사한 봄날의 기억',
@@ -231,7 +229,6 @@
             }
         };
 
-        // 프레임 레이아웃 (최대 4장 분할)
         const LAYOUT_DATA = [
             { id: '1-full', count: 1, name: '1장 (기본)', icon: '<div class="w-full h-full bg-stone-300 rounded shadow-sm border border-black/10"></div>' },
             { id: '2-horizontal', count: 2, name: '2장 (가로 분할)', icon: '<div class="flex flex-col gap-[3px] w-full h-full"><div class="w-full h-1/2 bg-stone-300 rounded shadow-sm border border-black/10"></div><div class="w-full h-1/2 bg-stone-300 rounded shadow-sm border border-black/10"></div></div>' },
@@ -247,19 +244,34 @@
         let hasPromptedUpload = false; 
         
         let selectedBgUrl = null;
-        let customUploadedBgSrc = null; // 사용자가 직접 올린 배경
+        let customUploadedBgSrc = null; 
         let generatedImageUrl = null;
         let modalPendingAction = null; 
         let isGenerating = false;
 
-        // 앱 초기화
+        // 이미지 사전 로딩 및 부드러운 페이드인 함수 (끊김 방지)
+        function preloadAndFadeInImage(url, elementId) {
+            const img = new Image();
+            img.src = url;
+            img.onload = () => {
+                const el = document.getElementById(elementId);
+                if (el) {
+                    el.classList.remove('opacity-0');
+                    el.classList.add('opacity-100');
+                }
+            };
+        }
+
+        // 앱 초기화 (계절 버튼 렌더링 시 페이드인 기법 적용)
         function initApp() {
             const seasonContainer = document.getElementById('season-buttons');
             Object.values(SEASON_DATA).forEach(season => {
+                const bgId = `bg-season-${season.id}`;
                 seasonContainer.innerHTML += `
-                    <button onclick="handleSeasonSelect('${season.id}')" class="group flex flex-col items-center p-6 sm:p-8 rounded-2xl transition-all duration-500 active:scale-95 hover:-translate-y-2 hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.2)] relative overflow-hidden h-48 sm:h-64 justify-end border border-transparent hover:border-white/50 w-full">
-                        <div class="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110" style="background-image: url('${season.thumbnail}')"></div>
-                        <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/10 transition-opacity duration-300 group-hover:opacity-90"></div>
+                    <button onclick="handleSeasonSelect('${season.id}')" style="background-color: ${season.fallbackColor}" class="group flex flex-col items-center p-6 sm:p-8 rounded-2xl transition-all duration-500 active:scale-95 hover:-translate-y-2 hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.2)] relative overflow-hidden h-48 sm:h-64 justify-end border border-transparent hover:border-white/50 w-full shadow-sm">
+                        <!-- 초기에 투명(opacity-0) 상태로 두고 이미지가 완전히 다운로드되면 서서히 나타나게 함 -->
+                        <div id="${bgId}" class="absolute inset-0 bg-cover bg-center transition-all duration-[1200ms] ease-in-out opacity-0 group-hover:scale-110" style="background-image: url('${season.thumbnail}')"></div>
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/10 transition-opacity duration-300 group-hover:opacity-90 z-0"></div>
                         <div class="relative z-10 flex flex-col items-center text-white w-full">
                             <i data-lucide="${season.icon}" stroke-width="1.5" class="w-8 h-8 sm:w-10 sm:h-10 mb-2 sm:mb-3 opacity-90"></i>
                             <span class="text-xl sm:text-2xl font-serif-kr font-semibold mb-1 tracking-wide text-white">${season.name.split(',')[0]}</span>
@@ -267,6 +279,8 @@
                         </div>
                     </button>
                 `;
+                // 비동기로 이미지 다운로드 지시
+                preloadAndFadeInImage(season.thumbnail, bgId);
             });
 
             const layoutContainer = document.getElementById('layout-buttons');
@@ -323,7 +337,7 @@
             
             document.getElementById('photo-input').value = "";
             selectedPhotos = []; 
-            customUploadedBgSrc = null; // 커스텀 배경 초기화
+            customUploadedBgSrc = null; 
             updatePhotoSelectionUI();
             setStep(3);
         }
@@ -331,42 +345,37 @@
         function initStep4() {
             document.getElementById('download-btn').style.backgroundColor = currentSeason.textColor;
             setStep(4);
-            // 최초 진입 시 첫 번째 기본 풍경을 배경으로 하여 렌더링
             updatePreviewFrame(currentSeason.bgOptions[0]);
         }
 
-        // 4단계: 배경 테마 버튼 렌더링 함수
+        // 배경 테마 버튼 렌더링 (마찬가지로 페이드인 적용)
         function renderBgButtons() {
             const bgContainer = document.getElementById('bg-theme-buttons');
             bgContainer.innerHTML = '';
             
-            // 3개의 계절 기본 배경 테마 버튼
             currentSeason.bgOptions.forEach((url, idx) => {
                 const isSelected = (selectedBgUrl === url);
+                const bgId = `bg-opt-${idx}`;
                 bgContainer.innerHTML += `
-                    <button onclick="updatePreviewFrame('${url}')" class="group relative rounded-xl overflow-hidden aspect-square border-2 ${isSelected ? 'border-stone-800 shadow-md' : 'border-transparent'} hover:opacity-80 transition-all">
-                        <img src="${url}" class="w-full h-full object-cover">
-                        <div class="absolute bottom-0 w-full bg-black/50 text-white text-[10px] sm:text-xs py-1">풍경 ${idx+1}</div>
+                    <button onclick="updatePreviewFrame('${url}')" style="background-color: ${currentSeason.fallbackColor}" class="group relative rounded-xl overflow-hidden aspect-square border-2 ${isSelected ? 'border-stone-800 shadow-md' : 'border-transparent'} hover:opacity-80 transition-all">
+                        <img id="${bgId}" src="${url}" class="w-full h-full object-cover transition-opacity duration-700 opacity-0">
+                        <div class="absolute bottom-0 w-full bg-black/50 text-white text-[10px] sm:text-xs py-1 z-10">풍경 ${idx+1}</div>
                     </button>
                 `;
+                preloadAndFadeInImage(url, bgId);
             });
             
-            // 4번째 버튼: 사용자 커스텀 배경 (업로드 전/후 UI 분리 및 재업로드 기능 추가)
             if (customUploadedBgSrc) {
                 const isSelected = (selectedBgUrl === customUploadedBgSrc);
                 bgContainer.innerHTML += `
                     <div class="relative rounded-xl overflow-hidden aspect-square border-2 ${isSelected ? 'border-stone-800 shadow-md' : 'border-transparent'} transition-all flex flex-col group">
-                        <!-- 이미지 클릭 시 배경 적용 -->
                         <img src="${customUploadedBgSrc}" class="w-full h-full object-cover cursor-pointer hover:opacity-80 transition-opacity" onclick="updatePreviewFrame('${customUploadedBgSrc}')">
-                        
-                        <!-- 하단 영역 클릭 시 안전하게 파일 입력창 다시 호출 -->
                         <div onclick="document.getElementById('custom-bg-input').click()" class="absolute bottom-0 w-full bg-blue-600/90 hover:bg-blue-700 text-white text-[10px] sm:text-xs py-1 text-center cursor-pointer flex justify-center items-center gap-1 transition-colors z-10">
                             <i data-lucide="refresh-cw" class="w-3 h-3"></i> 재업로드
                         </div>
                     </div>
                 `;
             } else {
-                // 아직 업로드하지 않은 경우
                 bgContainer.innerHTML += `
                     <button onclick="document.getElementById('custom-bg-input').click()" class="group relative flex flex-col items-center justify-center rounded-xl overflow-hidden aspect-square border-2 border-dashed border-stone-300 bg-stone-50 hover:bg-stone-100 hover:border-stone-400 transition-all text-stone-500">
                         <i data-lucide="image-plus" class="w-5 h-5 sm:w-6 sm:h-6 mb-1 text-stone-400 group-hover:text-stone-600 transition-colors"></i>
@@ -377,23 +386,22 @@
             lucide.createIcons();
         }
 
-        // 4단계: 커스텀 배경 사진 업로드 이벤트 안정성 추가
+        // 배경 이미지 업로드 로직
         document.getElementById('custom-bg-input').addEventListener('change', (e) => {
             if (isGenerating) {
                 e.target.value = "";
-                return; // 이미 렌더링 중이면 중복 업로드 방지
+                return;
             }
             if (e.target.files.length > 0) {
                 const file = e.target.files[0];
                 const reader = new FileReader();
                 reader.onload = (event) => {
                     customUploadedBgSrc = event.target.result;
-                    // 배경 업로드 완료 즉시 해당 사진으로 프리뷰 갱신
                     updatePreviewFrame(customUploadedBgSrc);
                 };
                 reader.readAsDataURL(file);
             }
-            e.target.value = ""; // 다른 파일로 언제든 교체 가능하게 input 값 리셋
+            e.target.value = ""; 
         });
 
         function handleReset() {
@@ -438,7 +446,6 @@
             closeModal();
         });
 
-        // 사진 추가/삭제 로직 (STEP 3)
         function handleAddPhotoClick() {
             if (!hasPromptedUpload) openModal('upload');
             else document.getElementById('photo-input').click();
@@ -516,11 +523,9 @@
             updatePhotoSelectionUI();
         }
 
-        // 이미지 로딩 & 그리기 헬퍼 (로컬/데이터URL 안전 로드)
         const loadImg = (src) => {
             return new Promise((resolve) => {
                 const img = new Image();
-                // 외부 URL을 쓸 때만 crossOrigin 활성화 (로컬이나 base64 데이터는 불필요)
                 if (src && src.startsWith('http')) {
                     img.crossOrigin = 'anonymous';
                 }
@@ -546,12 +551,11 @@
             ctx.strokeStyle = "rgba(0,0,0,0.1)"; ctx.lineWidth = 1; ctx.strokeRect(boxX, boxY, boxW, boxH);
         }
 
-        // 배경 썸네일 클릭 및 렌더링 로직 (비동기 안전 처리)
+        // 백그라운드 적용 및 캔버스 렌더링
         async function updatePreviewFrame(bgSrc) {
-            if (isGenerating) return; // 렌더링 도중 중복 실행 방지
+            if (isGenerating) return; 
             isGenerating = true;
             
-            // 전역 변수 업데이트 및 썸네일 보더 재렌더링
             selectedBgUrl = bgSrc;
             renderBgButtons(); 
             
@@ -564,7 +568,6 @@
                 const bgImg = await loadImg(bgSrc);
                 const logoImg = await loadImg('50436.png');
 
-                // 1장 프레임일 때 가로/세로 방향 유동적 변경, 그 외는 포스터형(세로) 고정
                 const isLandscape = (selectedLayout.id === '1-full' && userImgs[0] && userImgs[0].width > userImgs[0].height);
                 
                 const canvas = document.createElement('canvas');
@@ -574,7 +577,6 @@
                 const ch = isLandscape ? 1200 : 1500; 
                 canvas.width = cw; canvas.height = ch;
 
-                // 1. 선택된 배경 이미지 합성
                 if (bgImg) {
                     const bgRatio = bgImg.width / bgImg.height;
                     const canvasRatio = cw / ch;
@@ -590,7 +592,6 @@
                     ctx.fillStyle = currentSeason.fallbackColor; ctx.fillRect(0, 0, cw, ch);
                 }
 
-                // 2. 화이트 매트 그리기
                 const matteMargin = 80;
                 ctx.shadowColor = "rgba(0,0,0,0.2)"; ctx.shadowBlur = 40; ctx.shadowOffsetY = 15;
                 ctx.fillStyle = '#ffffff'; ctx.fillRect(matteMargin, matteMargin, cw - matteMargin*2, ch - matteMargin*2);
@@ -598,7 +599,6 @@
                 ctx.strokeStyle = "rgba(0,0,0,0.06)"; ctx.lineWidth = 1;
                 ctx.strokeRect(matteMargin+15, matteMargin+15, cw - matteMargin*2 - 30, ch - matteMargin*2 - 30);
 
-                // 3. 콜라주 레이아웃에 맞춰 사용자 이미지 합성
                 const photoMargin = 60;
                 const targetX = matteMargin + photoMargin;
                 const targetY = matteMargin + photoMargin;
@@ -635,7 +635,7 @@
                     if(layouts[idx]) drawImageCover(ctx, img, layouts[idx].x, layouts[idx].y, layouts[idx].w, layouts[idx].h);
                 });
 
-                // 4. 타이포그래피
+                // 타이포그래피 (크기 유지)
                 const textCenterY = targetY + targetH + 90;
                 ctx.fillStyle = currentSeason.textColor; ctx.textAlign = 'center';
                 ctx.font = '400 70px "Noto Serif KR", serif'; ctx.fillText(`장성숲체원에서의 기억`, cw / 2, textCenterY);
@@ -664,7 +664,6 @@
 
             } catch (error) {
                 console.error("프레임 렌더링 중 오류:", error);
-                alert("액자 생성 중 오류가 발생했습니다.");
             } finally {
                 document.getElementById('preview-loading').classList.add('hidden');
                 isGenerating = false;
