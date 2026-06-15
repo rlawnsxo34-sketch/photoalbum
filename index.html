@@ -570,11 +570,15 @@
 
                 const isLandscape = (selectedLayout.id === '1-full' && userImgs[0] && userImgs[0].width > userImgs[0].height);
                 
+                // CP1500 Postcard 사이즈 적용 (100mm x 148mm @ 300dpi -> 1182px x 1748px)
+                const CP1500_POSTCARD_WIDTH = 1182;
+                const CP1500_POSTCARD_HEIGHT = 1748;
+
                 const canvas = document.createElement('canvas');
                 const ctx = canvas.getContext('2d');
 
-                const cw = isLandscape ? 1500 : 1200; 
-                const ch = isLandscape ? 1200 : 1500; 
+                const cw = isLandscape ? CP1500_POSTCARD_HEIGHT : CP1500_POSTCARD_WIDTH; 
+                const ch = isLandscape ? CP1500_POSTCARD_WIDTH : CP1500_POSTCARD_HEIGHT; 
                 canvas.width = cw; canvas.height = ch;
 
                 if (bgImg) {
@@ -592,18 +596,19 @@
                     ctx.fillStyle = currentSeason.fallbackColor; ctx.fillRect(0, 0, cw, ch);
                 }
 
-                const matteMargin = 80;
+                // 마진 값을 새로운 해상도에 맞춰 비율 조정
+                const matteMargin = 90; // 기존 80 -> 90
                 ctx.shadowColor = "rgba(0,0,0,0.2)"; ctx.shadowBlur = 40; ctx.shadowOffsetY = 15;
                 ctx.fillStyle = '#ffffff'; ctx.fillRect(matteMargin, matteMargin, cw - matteMargin*2, ch - matteMargin*2);
                 ctx.shadowColor = "transparent";
                 ctx.strokeStyle = "rgba(0,0,0,0.06)"; ctx.lineWidth = 1;
                 ctx.strokeRect(matteMargin+15, matteMargin+15, cw - matteMargin*2 - 30, ch - matteMargin*2 - 30);
 
-                const photoMargin = 60;
+                const photoMargin = 60; // 기존 60 (유지)
                 const targetX = matteMargin + photoMargin;
                 const targetY = matteMargin + photoMargin;
                 const targetW = cw - matteMargin*2 - photoMargin*2;
-                const targetH = ch - matteMargin*2 - photoMargin - 360; 
+                const targetH = ch - matteMargin*2 - photoMargin - 420; // 기존 360 -> 420
 
                 const gap = 30; 
                 const layouts = [];
@@ -636,7 +641,7 @@
                 });
 
                 // 타이포그래피 (크기 유지)
-                const textCenterY = targetY + targetH + 90;
+                const textCenterY = targetY + targetH + 110; // 기존 90 -> 110
                 ctx.fillStyle = currentSeason.textColor; ctx.textAlign = 'center';
                 ctx.font = '400 70px "Noto Serif KR", serif'; ctx.fillText(`장성숲체원에서의 기억`, cw / 2, textCenterY);
                 
