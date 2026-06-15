@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>장성숲체원 기억 보관소</title>
+    <title>국립장성숲체원 사진 앨범 제작</title>
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -122,6 +122,7 @@
                     </div>
                 </div>
 
+                <!-- 최초의 사진 파일 입력 요소 -->
                 <input type="file" id="photo-input" accept="image/*" multiple class="hidden" />
                 
                 <button onclick="setStep(2)" id="btn-back-step3" class="mt-6 sm:mt-10 px-5 py-2.5 text-stone-500 hover:text-stone-800 font-gowun text-sm transition-colors active:scale-95 bg-white sm:bg-transparent rounded-full border border-stone-200">
@@ -279,7 +280,6 @@
                         </div>
                     </button>
                 `;
-                // 비동기로 이미지 다운로드 지시
                 preloadAndFadeInImage(season.thumbnail, bgId);
             });
 
@@ -335,7 +335,8 @@
             document.getElementById('upload-icon').style.color = currentSeason.textColor;
             document.getElementById('upload-instruction-text').innerText = `선택하신 [${selectedLayout.name}] 모양에 맞게 총 ${selectedLayout.count}장을 앨범에 추가해 주세요.`;
             
-            document.getElementById('photo-input').value = "";
+            // 파일 폼 완전 교체로 안전하게 초기화
+            resetFileInput();
             selectedPhotos = []; 
             customUploadedBgSrc = null; 
             updatePhotoSelectionUI();
@@ -348,7 +349,7 @@
             updatePreviewFrame(currentSeason.bgOptions[0]);
         }
 
-        // 배경 테마 버튼 렌더링 (마찬가지로 페이드인 적용)
+        // 배경 테마 버튼 렌더링
         function renderBgButtons() {
             const bgContainer = document.getElementById('bg-theme-buttons');
             bgContainer.innerHTML = '';
@@ -386,7 +387,7 @@
             lucide.createIcons();
         }
 
-        // 배경 이미지 업로드 로직
+        // 커스텀 배경 이미지 업로드 이벤트
         document.getElementById('custom-bg-input').addEventListener('change', (e) => {
             if (isGenerating) {
                 e.target.value = "";
@@ -408,10 +409,11 @@
             currentSeason = null; selectedLayout = null; selectedPhotos = []; 
             selectedBgUrl = null; customUploadedBgSrc = null; generatedImageUrl = null;
             document.getElementById('preview-loading').classList.add('hidden');
+            resetFileInput(); // 리셋할 때 입력 폼 초기화
             setStep(1);
         }
 
-        // 모달 관리
+        // 팝업 모달 관리
         function openModal(type) {
             const modal = document.getElementById('custom-modal');
             const title = document.getElementById('modal-title');
@@ -426,7 +428,8 @@
                 confirmBtn.innerText = '허용하기';
                 confirmBtn.className = 'flex-1 py-4 text-green-600 font-bold font-gowun text-lg border-l border-stone-100 hover:bg-white active:bg-stone-50';
                 modalPendingAction = () => { 
-                    hasPromptedUpload = true; document.getElementById('photo-input').click(); 
+                    hasPromptedUpload = true; 
+                    openFreshFilePicker(); // 모달 승인 시 새로운 Picker 실행
                 };
             } else if (type === 'download') {
                 title.innerText = '앨범 다운로드';
@@ -441,17 +444,41 @@
         }
 
         function closeModal() { document.getElementById('custom-modal').classList.add('hidden'); modalPendingAction = null; }
+        
         document.getElementById('modal-confirm-btn').addEventListener('click', () => {
             if (modalPendingAction) modalPendingAction();
             closeModal();
         });
 
+        // 사진 추가 버튼 클릭 시의 동작
         function handleAddPhotoClick() {
             if (!hasPromptedUpload) openModal('upload');
-            else document.getElementById('photo-input').click();
+            else openFreshFilePicker(); // 권한 확인 이후엔 무조건 새 Picker 오픈
         }
 
-        document.getElementById('photo-input').addEventListener('change', async (e) => {
+        // 코어 변경점: 파일 입력 요소를 완전히 재생성하여 OS 갤러리의 체크 표시 기억 초기화
+        function resetFileInput() {
+            const oldInput = document.getElementById('photo-input');
+            if(oldInput) {
+                const newInput = document.createElement('input');
+                newInput.type = 'file';
+                newInput.id = 'photo-input';
+                newInput.accept = 'image/*';
+                newInput.multiple = true;
+                newInput.className = 'hidden';
+                newInput.addEventListener('change', handleFileInputChange);
+                oldInput.parentNode.replaceChild(newInput, oldInput);
+            }
+        }
+
+        // 새로 생성된 인풋을 강제 클릭하는 함수
+        function openFreshFilePicker() {
+            resetFileInput();
+            document.getElementById('photo-input').click();
+        }
+
+        // 파일 선택 시 발생하는 이벤트 핸들러
+        async function handleFileInputChange(e) {
             const files = Array.from(e.target.files);
             if (files.length > 0) {
                 const remainingSlots = selectedLayout.count - selectedPhotos.length;
@@ -473,8 +500,12 @@
                 } catch (error) { console.error("파일 읽기 오류:", error); }
             }
             e.target.value = "";
-        });
+        }
+        
+        // 초기 바인딩 (문서가 처음 로드되었을 때)
+        document.getElementById('photo-input').addEventListener('change', handleFileInputChange);
 
+        // 사진 등록 UI 업데이트
         function updatePhotoSelectionUI() {
             const emptyUI = document.getElementById('upload-box-empty');
             const selectionUI = document.getElementById('photo-selection-ui');
@@ -518,11 +549,13 @@
             }
         }
 
+        // 사용자가 특정 사진만 삭제할 때
         function removePhoto(index) {
             selectedPhotos.splice(index, 1);
             updatePhotoSelectionUI();
         }
 
+        // 이미지 그리기 유틸리티
         const loadImg = (src) => {
             return new Promise((resolve) => {
                 const img = new Image();
@@ -597,18 +630,18 @@
                 }
 
                 // 마진 값을 새로운 해상도에 맞춰 비율 조정
-                const matteMargin = 90; // 기존 80 -> 90
+                const matteMargin = 90; 
                 ctx.shadowColor = "rgba(0,0,0,0.2)"; ctx.shadowBlur = 40; ctx.shadowOffsetY = 15;
                 ctx.fillStyle = '#ffffff'; ctx.fillRect(matteMargin, matteMargin, cw - matteMargin*2, ch - matteMargin*2);
                 ctx.shadowColor = "transparent";
                 ctx.strokeStyle = "rgba(0,0,0,0.06)"; ctx.lineWidth = 1;
                 ctx.strokeRect(matteMargin+15, matteMargin+15, cw - matteMargin*2 - 30, ch - matteMargin*2 - 30);
 
-                const photoMargin = 60; // 기존 60 (유지)
+                const photoMargin = 60; 
                 const targetX = matteMargin + photoMargin;
                 const targetY = matteMargin + photoMargin;
                 const targetW = cw - matteMargin*2 - photoMargin*2;
-                const targetH = ch - matteMargin*2 - photoMargin - 420; // 기존 360 -> 420
+                const targetH = ch - matteMargin*2 - photoMargin - 420; 
 
                 const gap = 30; 
                 const layouts = [];
@@ -640,8 +673,8 @@
                     if(layouts[idx]) drawImageCover(ctx, img, layouts[idx].x, layouts[idx].y, layouts[idx].w, layouts[idx].h);
                 });
 
-                // 타이포그래피 (크기 유지)
-                const textCenterY = targetY + targetH + 110; // 기존 90 -> 110
+                // 타이포그래피
+                const textCenterY = targetY + targetH + 110; 
                 ctx.fillStyle = currentSeason.textColor; ctx.textAlign = 'center';
                 ctx.font = '400 70px "Noto Serif KR", serif'; ctx.fillText(`장성숲체원에서의 기억`, cw / 2, textCenterY);
                 
