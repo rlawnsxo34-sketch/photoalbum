@@ -188,7 +188,7 @@
                 <p id="modal-desc" class="text-stone-500 font-gowun text-[15px] leading-relaxed keep-all"></p>
             </div>
             <div class="flex border-t border-stone-100 bg-stone-50/50">
-                <button onclick="closeModal()" class="flex-1 py-4 text-stone-500 font-gowun text-lg hover:bg-stone-100 transition-colors active:bg-stone-200">취소</button>
+                <button id="modal-cancel-btn" onclick="closeModal()" class="flex-1 py-4 text-stone-500 font-gowun text-lg hover:bg-stone-100 transition-colors active:bg-stone-200">취소</button>
                 <button id="modal-confirm-btn" class="flex-1 py-4 text-green-600 font-bold font-gowun text-lg border-l border-stone-100 hover:bg-white transition-colors active:bg-stone-50">확인</button>
             </div>
         </div>
@@ -231,7 +231,8 @@
         };
 
         const LAYOUT_DATA = [
-            { id: '1-full', count: 1, name: '1장 (기본)', icon: '<div class="w-full h-full bg-stone-300 rounded shadow-sm border border-black/10"></div>' },
+            { id: '1-vertical', count: 1, name: '1장 (세로형)', icon: '<div class="w-[70%] h-full mx-auto bg-stone-300 rounded shadow-sm border border-black/10"></div>' },
+            { id: '1-horizontal', count: 1, name: '1장 (가로형)', icon: '<div class="flex flex-col justify-center h-full"><div class="w-full h-[70%] bg-stone-300 rounded shadow-sm border border-black/10"></div></div>' },
             { id: '2-horizontal', count: 2, name: '2장 (가로 분할)', icon: '<div class="flex flex-col gap-[3px] w-full h-full"><div class="w-full h-1/2 bg-stone-300 rounded shadow-sm border border-black/10"></div><div class="w-full h-1/2 bg-stone-300 rounded shadow-sm border border-black/10"></div></div>' },
             { id: '2-vertical', count: 2, name: '2장 (세로 분할)', icon: '<div class="flex gap-[3px] w-full h-full"><div class="w-1/2 h-full bg-stone-300 rounded shadow-sm border border-black/10"></div><div class="w-1/2 h-full bg-stone-300 rounded shadow-sm border border-black/10"></div></div>' },
             { id: '3-top', count: 3, name: '3장 (상단 강조)', icon: '<div class="flex flex-col gap-[3px] w-full h-full"><div class="w-full h-1/2 bg-stone-300 rounded shadow-sm border border-black/10"></div><div class="flex gap-[3px] w-full h-1/2"><div class="w-1/2 h-full bg-stone-300 rounded shadow-sm border border-black/10"></div><div class="w-1/2 h-full bg-stone-300 rounded shadow-sm border border-black/10"></div></div></div>' },
@@ -359,7 +360,7 @@
                 const bgId = `bg-opt-${idx}`;
                 bgContainer.innerHTML += `
                     <button onclick="updatePreviewFrame('${url}')" style="background-color: ${currentSeason.fallbackColor}" class="group relative rounded-xl overflow-hidden aspect-square border-2 ${isSelected ? 'border-stone-800 shadow-md' : 'border-transparent'} hover:opacity-80 transition-all">
-                        <img id="${bgId}" src="${url}" class="w-full h-full object-cover transition-opacity duration-700 opacity-0">
+                        <img id="${bgId}" src="${url}" class="w-full h-full object-cover transition-opacity duration-700 opacity-0" onerror="this.src='https://placehold.co/100x100/eeeeee/999999?text=bg'; this.classList.remove('opacity-0');">
                         <div class="absolute bottom-0 w-full bg-black/50 text-white text-[10px] sm:text-xs py-1 z-10">풍경 ${idx+1}</div>
                     </button>
                 `;
@@ -413,13 +414,16 @@
             setStep(1);
         }
 
-        // 팝업 모달 관리
-        function openModal(type) {
+        // 팝업 모달 관리 (alert 방지 정책 대응)
+        function openModal(type, customMsg = '') {
             const modal = document.getElementById('custom-modal');
             const title = document.getElementById('modal-title');
             const desc = document.getElementById('modal-desc');
             const iconContainer = document.getElementById('modal-icon-container');
             const confirmBtn = document.getElementById('modal-confirm-btn');
+            const cancelBtn = document.getElementById('modal-cancel-btn');
+
+            cancelBtn.style.display = 'block';
 
             if (type === 'upload') {
                 title.innerText = '사진첩 접근 권한';
@@ -438,6 +442,15 @@
                 confirmBtn.innerText = '다운로드';
                 confirmBtn.className = 'flex-1 py-4 text-blue-600 font-bold font-gowun text-lg border-l border-stone-100 hover:bg-white active:bg-stone-50';
                 modalPendingAction = () => { executeDownload(); };
+            } else if (type === 'alert') {
+                // alert 함수 대체용 모달
+                title.innerText = '안내';
+                desc.innerText = customMsg;
+                iconContainer.innerHTML = '<i data-lucide="info" class="w-7 h-7 text-stone-600"></i>';
+                confirmBtn.innerText = '확인';
+                confirmBtn.className = 'flex-1 py-4 text-stone-600 font-bold font-gowun text-lg border-l border-stone-100 hover:bg-white active:bg-stone-50';
+                cancelBtn.style.display = 'none'; // 경고창이므로 취소버튼 숨김
+                modalPendingAction = null; 
             }
             lucide.createIcons(); 
             modal.classList.remove('hidden');
@@ -456,7 +469,7 @@
             else openFreshFilePicker(); // 권한 확인 이후엔 무조건 새 Picker 오픈
         }
 
-        // 코어 변경점: 파일 입력 요소를 완전히 재생성하여 OS 갤러리의 체크 표시 기억 초기화
+        // 파일 입력 요소를 완전히 재생성하여 OS 갤러리의 체크 표시 기억 초기화
         function resetFileInput() {
             const oldInput = document.getElementById('photo-input');
             if(oldInput) {
@@ -485,7 +498,8 @@
                 const filesToAdd = files.slice(0, remainingSlots);
 
                 if (files.length > remainingSlots) {
-                    alert(`선택하신 프레임은 총 ${selectedLayout.count}장입니다. 초과된 사진은 제외되었습니다.`);
+                    // 시스템 규칙에 따라 alert 대신 커스텀 모달 사용
+                    openModal('alert', `선택하신 프레임은 총 ${selectedLayout.count}장입니다. 초과된 사진은 제외되었습니다.`);
                 }
                 try {
                     const photoSrcs = await Promise.all(filesToAdd.map(file => {
@@ -601,7 +615,8 @@
                 const bgImg = await loadImg(bgSrc);
                 const logoImg = await loadImg('50436.png');
 
-                const isLandscape = (selectedLayout.id === '1-full' && userImgs[0] && userImgs[0].width > userImgs[0].height);
+                // 사용자가 가로형을 명시적으로 선택했을 때 전체 캔버스를 가로 모드로 전환
+                const isLandscape = (selectedLayout.id === '1-horizontal');
                 
                 // CP1500 Postcard 사이즈 적용 (100mm x 148mm @ 300dpi -> 1182px x 1748px)
                 const CP1500_POSTCARD_WIDTH = 1182;
@@ -641,12 +656,15 @@
                 const targetX = matteMargin + photoMargin;
                 const targetY = matteMargin + photoMargin;
                 const targetW = cw - matteMargin*2 - photoMargin*2;
-                const targetH = ch - matteMargin*2 - photoMargin - 420; 
+                
+                // 가로형일 때는 사진이 너무 납작해지지 않도록 하단 텍스트 여백을 조정
+                const textSpace = isLandscape ? 280 : 420;
+                const targetH = ch - matteMargin*2 - photoMargin - textSpace; 
 
                 const gap = 30; 
                 const layouts = [];
 
-                if (selectedLayout.id === '1-full') { layouts.push({ x: targetX, y: targetY, w: targetW, h: targetH }); } 
+                if (selectedLayout.id === '1-vertical' || selectedLayout.id === '1-horizontal') { layouts.push({ x: targetX, y: targetY, w: targetW, h: targetH }); } 
                 else if (selectedLayout.id === '2-horizontal') {
                     const boxH = (targetH - gap) / 2;
                     layouts.push({ x: targetX, y: targetY, w: targetW, h: boxH }); layouts.push({ x: targetX, y: targetY + boxH + gap, w: targetW, h: boxH });
@@ -673,28 +691,28 @@
                     if(layouts[idx]) drawImageCover(ctx, img, layouts[idx].x, layouts[idx].y, layouts[idx].w, layouts[idx].h);
                 });
 
-                // 타이포그래피
-                const textCenterY = targetY + targetH + 110; 
+                // 타이포그래피 (가로/세로 방향에 따라 텍스트 위치 비율 조정)
+                const textCenterY = targetY + targetH + (isLandscape ? 80 : 110); 
                 ctx.fillStyle = currentSeason.textColor; ctx.textAlign = 'center';
                 ctx.font = '400 70px "Noto Serif KR", serif'; ctx.fillText(`장성숲체원에서의 기억`, cw / 2, textCenterY);
                 
-                ctx.beginPath(); ctx.moveTo(cw / 2 - 40, textCenterY + 50); ctx.lineTo(cw / 2 + 40, textCenterY + 50);
+                ctx.beginPath(); ctx.moveTo(cw / 2 - 40, textCenterY + (isLandscape ? 40 : 50)); ctx.lineTo(cw / 2 + 40, textCenterY + (isLandscape ? 40 : 50));
                 ctx.strokeStyle = currentSeason.accent; ctx.lineWidth = 2; ctx.stroke();
 
                 ctx.font = '40px "Gowun Dodum", "Pretendard", sans-serif'; ctx.fillStyle = '#6b7280'; 
-                ctx.fillText(currentSeason.desc, cw / 2, textCenterY + 110);
+                ctx.fillText(currentSeason.desc, cw / 2, textCenterY + (isLandscape ? 100 : 110));
 
                 const currentMonth = new Date().getMonth() + 1; 
                 const treeText = `${currentMonth}월 ${MONTHLY_TREES[currentMonth]}`;
                 ctx.font = '400 32px "Gowun Dodum", "Pretendard", sans-serif'; ctx.fillStyle = '#8a8886'; 
-                ctx.fillText(treeText, cw / 2, textCenterY + 160);
+                ctx.fillText(treeText, cw / 2, textCenterY + (isLandscape ? 150 : 160));
 
                 if (logoImg) {
                     const logoH = 55; const logoW = logoImg.width * (logoH / logoImg.height); 
-                    ctx.drawImage(logoImg, cw/2 - logoW/2, ch - matteMargin - logoH - 20, logoW, logoH);
+                    ctx.drawImage(logoImg, cw/2 - logoW/2, ch - matteMargin - logoH - (isLandscape ? 10 : 20), logoW, logoH);
                 } else {
                     ctx.font = '300 28px "Pretendard", sans-serif'; ctx.fillStyle = '#9ca3af';
-                    ctx.fillText(`KOREA FOREST WELFARE INSTITUTE`, cw / 2, ch - matteMargin - 30);
+                    ctx.fillText(`KOREA FOREST WELFARE INSTITUTE`, cw / 2, ch - matteMargin - (isLandscape ? 20 : 30));
                 }
 
                 generatedImageUrl = canvas.toDataURL('image/png', 1.0);
